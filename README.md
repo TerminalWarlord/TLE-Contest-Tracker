@@ -26,37 +26,38 @@ A web application to track programming contests from platforms like **Codeforces
 
 ```bash
 git clone https://github.com/TerminalWarlord/TLE-Contest-Tracker.git
+```
 
 2. Install Dependencies
 
 Frontend:
-
+```bash
 cd frontend
 npm install
-
+```
 Backend:
-
+```bash
 cd backend
 npm install
-
+```
 3. Set up Environment Variables
 
-Create a .env file in the backend/ directory with the necessary MongoDB URI and JWT secret.
+Create a `.env` file in the backend/ directory with the necessary `MongoDB URI` and `JWT secret`.
 
 4. Run the Application
 
 Frontend:
-
+```bash
 cd frontend
 npm start
-
+```
 Backend:
-
+```bash
 cd backend
 npm start
-
-The app will be available at http://localhost:3000 for the frontend and http://localhost:5000 for the backend.
 ```
+
+The app will be available at http://localhost:5173 for the frontend and http://localhost:3000 (unless PORT is defined in the environment variable) for the backend.
 
 ## Contact
 
