@@ -11,5 +11,9 @@ export interface Contest {
     platform: Platform;
     startsAt: Date;
     duration: number;
-    contestTitle: string
+    contestTitle: string;
+    hasEnded?: boolean; 
 }
+
+export type FilterType = "upcoming" | "past";
+export type PlatformType = "codeforces" | "codechef" | "leetcode";

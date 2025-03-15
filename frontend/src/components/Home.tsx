@@ -1,18 +1,50 @@
-import { useEffect } from 'react';
 import Contests from './Contests'
 import Filter from './Filter'
 import NavBar from './NavBar'
 import Footer from './Footer';
-import { useSearchParams } from 'react-router-dom';
+import { FilterType, PlatformType } from '@/types/contest';
+import { useState } from 'react';
+import { FilterContext } from '@/store/filter-context';
 
 const Home = () => {
+  const [currentFilter, setCurrentFilter] = useState<FilterType>("upcoming");
+  const [selectedPlatforms, setSelectedPlatform] = useState<PlatformType[]>(["codeforces", "codechef", "leetcode"])
 
-  // useEffect(() => {
-  //   document.body.classList.add("bg-gradient-to-tr", "from-slate-50", "to-blue-300/15");
+  function handleFilterChange(val: FilterType) {
+    setCurrentFilter(val);
+  }
 
-  //   return () => document.body.classList.remove("bg-gradient-to-tr", "from-slate-50", "to-blue-300/15");
-  // }, [])
+  function resetPlatforms() {
+    setSelectedPlatform(["codeforces", "codechef", "leetcode"]);
+  }
+  console.log(selectedPlatforms);
+  console.log(currentFilter);
 
+
+  function handlePlatformFilter(val: PlatformType) {
+    if (selectedPlatforms.includes(val)) {
+      setSelectedPlatform(prevState => {
+        const filteredPlatforms = prevState.filter(platform => platform !== val);
+        return filteredPlatforms;
+      })
+    }
+    else {
+      setSelectedPlatform(prevState => {
+        return [
+          ...prevState,
+          val
+        ]
+      })
+    }
+  }
+
+  const ctxValue = {
+    type: currentFilter,
+    platforms: selectedPlatforms,
+    updatePlatform: handlePlatformFilter,
+    updateFilterType: handleFilterChange,
+    resetPlatform: resetPlatforms
+  }
 
   return (
     <div className='w-full flex flex-col justify-center items-center'>
@@ -22,8 +54,10 @@ const Home = () => {
         <p className='w-4/5 text-center text-gray-500'>Upcoming Contests
           Track programming contests from Codeforces, CodeChef, and LeetCode. Never miss a contest again!</p>
       </div>
-      <Filter />
-      <Contests />
+      <FilterContext.Provider value={ctxValue}>
+        <Filter/>
+        <Contests />
+      </FilterContext.Provider>
       <Footer />
     </div>
   )

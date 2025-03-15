@@ -4,6 +4,7 @@ import { getContests } from "@/lib/dummy_data";
 import { Loader2 } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "./ui/pagination";
+import { Contest } from "@/types/contest";
 
 
 
@@ -43,11 +44,11 @@ const Contests = () => {
     }
     if (data) {
         content = <>
-            <div className="grid grid-cols-3 gap-6" style={{
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" style={{
                 animation: "slideUp 1s ease-in-out forwards"
             }}>
-                {data.contests.map(contest => {
-                    return <ContestCard {...contest} />
+                {data.contests.map((contest) => {
+                    return <ContestCard key={contest.id} contest={contest as unknown as Contest} />
                 })}
             </div >
             <Pagination className="flex w-full justify-end items-end my-2">
@@ -67,7 +68,6 @@ const Contests = () => {
 
     return (
         <div className="w-7/8 my-4">
-
             {content}
         </div>
     )

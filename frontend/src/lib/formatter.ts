@@ -17,7 +17,8 @@ export const timeDifference = (date: Date): { hours: string, minutes: string, se
 }
 
 
-export const formatDateTime = (date: Date) => {
+export const formatDateTime = (date: Date): string => {
+
     const formattedDate = date.toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'short',

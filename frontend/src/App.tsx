@@ -2,6 +2,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import './App.css'
 import Home from './components/Home';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ThemeProvider } from './components/theme-provider';
 
 
 const queryClient = new QueryClient();
@@ -13,7 +14,9 @@ const routes = createBrowserRouter([
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={routes}></RouterProvider>
+      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+        <RouterProvider router={routes}></RouterProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   )
 }

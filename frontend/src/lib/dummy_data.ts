@@ -1,3 +1,4 @@
+import { FilterType, PlatformType } from "@/types/contest";
 
 
 
@@ -67,11 +68,11 @@ const DUMMY_CONTESTS = [
     },
 ];
 
-export const getContests = async (offset: number=0, limit: number=10 ) =>{
+export const getContests = async (offset: number = 0, limit: number = 10, platforms: PlatformType[] = ["codeforces", "codechef", "leetcode"], type: FilterType = "upcoming") => {
 
 
-    await new Promise(resolve=>setTimeout(resolve, 100));
-    
+    await new Promise(resolve => setTimeout(resolve, 100));
+
     return {
         offset,
         limit,

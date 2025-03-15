@@ -1,44 +1,21 @@
 import { ArrowDown01, ArrowUp01, FilterIcon, X } from "lucide-react"
 import { Button } from "./ui/button"
-import { useState } from "react"
+import { useContext, useState } from "react"
+import { FilterContext } from "@/store/filter-context";
 
-type FilterType = "upcoming" | "past";
-type PlatformType = "codeforces" | "codechef" | "leetcode";
 
-const Filter = ({ filter = "upcoming" }: { filter?: FilterType }) => {
-    const [currentFilter, setCurrentFilter] = useState<FilterType>(filter);
-    const [selectedPlatforms, setSelectedPlatform] = useState<PlatformType[]>(["codeforces", "codechef", "leetcode"])
+
+const Filter = () => {
     const [isFilterOpen, setIsFilterOpen] = useState(false);
-
-    function handleFilterChange(val: FilterType) {
-        setCurrentFilter(val);
-    }
-
-
+    const filterCtx = useContext(FilterContext);
+    console.log(filterCtx)
     function toggleFilter() {
         setIsFilterOpen(prevState => !prevState)
     }
 
-    function handlePlatformFilter(val: PlatformType) {
-        if (selectedPlatforms.includes(val)) {
-            setSelectedPlatform(prevState => {
-                const filteredPlatforms = prevState.filter(platform => platform !== val);
-                return filteredPlatforms;
-            })
-        }
-        else {
-            setSelectedPlatform(prevState => {
-                return [
-                    ...prevState,
-                    val
-                ]
-            })
-        }
-    }
-
     return (
         <div
-            className="w-7/8 bg-white rounded-lg py-3 flex justify-between items-center px-4  flex-col"
+            className="w-7/8 bg-white dark:bg-gray-800/30 rounded-lg py-3 flex justify-between items-center px-4  flex-col"
             style={{
                 boxShadow: "0 5px 20px 2px rgba(0, 0, 0, 0.05)"
             }}>
@@ -50,15 +27,15 @@ const Filter = ({ filter = "upcoming" }: { filter?: FilterType }) => {
                 <div className="flex space-x-2 transition-all ease-in-out duration-400">
                     <Button
                         className="rounded-xl transition-all ease-in-out duration-400"
-                        variant={`${currentFilter === "upcoming" ? "default" : "outline"}`}
-                        onClick={() => handleFilterChange('upcoming')}
+                        variant={`${filterCtx.type === "upcoming" ? "default" : "outline"}`}
+                        onClick={() => filterCtx.updateFilterType('upcoming')}
                     >
                         <ArrowDown01 /> Upcoming
                     </Button>
                     <Button
                         className="rounded-xl transition-all ease-in-out duration-400"
-                        variant={`${currentFilter === "past" ? "default" : "outline"}`}
-                        onClick={() => handleFilterChange('past')}
+                        variant={`${filterCtx.type === "past" ? "default" : "outline"}`}
+                        onClick={() => filterCtx.updateFilterType('past')}
 
                     >
                         <ArrowUp01 /> Past
@@ -71,18 +48,18 @@ const Filter = ({ filter = "upcoming" }: { filter?: FilterType }) => {
                 <div className="flex justify-between items-center">
                     <div className="my-2 space-x-1">
                         <Button
-                            onClick={() => handlePlatformFilter("codeforces")}
-                            className={`rounded-2xl cursor-pointer ${selectedPlatforms.includes("codeforces") ? "hover:bg-gray-700" : "bg-slate-300 text-gray-600 hover:bg-slate-400/70"} `}>
+                            onClick={() => filterCtx.updatePlatform("codeforces")}
+                            className={`rounded-2xl cursor-pointer ${filterCtx.type.includes("codeforces") ? "hover:bg-gray-700 hover:dark:bg-gray-400" : "bg-slate-300 text-gray-600 hover:bg-slate-400/70  dark:bg-gray-600/40 dark:text-gray-400 hover:dark:bg-gray-600/50"} `}>
                             Codeforces
                         </Button>
                         <Button
-                            onClick={() => handlePlatformFilter("codechef")}
-                            className={`rounded-2xl cursor-pointer ${selectedPlatforms.includes("codechef") ? "hover:bg-gray-700" : "bg-slate-300 text-gray-600 hover:bg-slate-400/70"} `}>
+                            onClick={() => filterCtx.updatePlatform("codechef")}
+                            className={`rounded-2xl cursor-pointer ${filterCtx.type.includes("codechef") ? "hover:bg-gray-700 hover:dark:bg-gray-400" : "bg-slate-300 text-gray-600 hover:bg-slate-400/70  dark:bg-gray-600/40 dark:text-gray-400 hover:dark:bg-gray-600/50"} `}>
                             Codechef
                         </Button>
                         <Button
-                            onClick={() => handlePlatformFilter("leetcode")}
-                            className={`rounded-2xl cursor-pointer ${selectedPlatforms.includes("leetcode") ? "hover:bg-gray-700" : "bg-slate-300 text-gray-600 hover:bg-slate-400/70"} `}>
+                            onClick={() => filterCtx.updatePlatform("leetcode")}
+                            className={`rounded-2xl cursor-pointer ${filterCtx.type.includes("leetcode") ? "hover:bg-gray-700 hover:dark:bg-gray-400" : "bg-slate-300 text-gray-600 hover:bg-slate-400/70  dark:bg-gray-600/40 dark:text-gray-400 hover:dark:bg-gray-600/50"} `}>
                             Leetcode
                         </Button>
 
@@ -90,9 +67,9 @@ const Filter = ({ filter = "upcoming" }: { filter?: FilterType }) => {
                     <div>
                         <div
                             className="flex items-center justify-center space-x-1 cursor-pointer"
-                            onClick={() => setSelectedPlatform([])}
+                            onClick={() => filterCtx.resetPlatform()}
                         >
-                            <X size={15} /> <p>Clear</p>
+                            <X size={15} /> <p>Reset</p>
                         </div>
                     </div>
                 </div>
