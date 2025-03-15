@@ -1,11 +1,20 @@
 import { FilterType, PlatformType } from "@/types/contest";
 import { createContext } from "react";
 
-export const FilterContext = createContext({
+interface FilterContextType {
+    type: FilterType;
+    platforms: PlatformType[];
+    updatePlatform: (platform: PlatformType) => void;
+    updateFilterType: (filterType: FilterType) => void;
+    resetPlatform: () => void;
+}
+
+
+export const FilterContext = createContext<FilterContextType>({
     type: "upcoming",
-    platforms: ["codeforces", "leetcode", "codechef"],
-    updatePlatform: (platform: PlatformType) => { },
-    updateFilterType: (filterType: FilterType)=> {},
+    platforms: [],
+    updatePlatform: () => { },
+    updateFilterType: ()=> {},
     resetPlatform: ()=> {},
 });
 

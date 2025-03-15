@@ -1,22 +1,28 @@
 import ContestCard from "./ContestCard"
 import { useQuery } from "@tanstack/react-query";
-import { getContests } from "@/lib/dummy_data";
+import { getContests } from "@/lib/http";
 import { Loader2 } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "./ui/pagination";
 import { Contest } from "@/types/contest";
+import { useContext, useEffect } from "react";
+import { FilterContext } from "@/store/filter-context";
 
 
 
 
 const Contests = () => {
     const [searchParams] = useSearchParams();
+    console.log("CONTEST")
     const page = parseInt(searchParams.get("page") || "0");
     const limit = parseInt(searchParams.get("limit") || "0");
+    const filterCtx = useContext(FilterContext);
     const { data, error, isPending } = useQuery({
-        queryKey: ['contests'],
-        queryFn: () => getContests(page - 1, limit)
+        queryKey: ['contests', page-1, limit, filterCtx.platforms, filterCtx.type],
+        queryFn: () => getContests(page - 1, limit, filterCtx.platforms, filterCtx.type)
     });
+
+
 
     let content;
     if (error) {

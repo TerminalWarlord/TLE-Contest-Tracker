@@ -1,14 +1,21 @@
 import { ArrowDown01, ArrowUp01, FilterIcon, X } from "lucide-react"
 import { Button } from "./ui/button"
-import { useContext, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import { FilterContext } from "@/store/filter-context";
+import { PlatformType } from "@/types/contest";
 
 
 
 const Filter = () => {
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const filterCtx = useContext(FilterContext);
-    console.log(filterCtx)
+
+    const [platforms, setPlatforms] = useState<PlatformType[]>(filterCtx.platforms);
+    
+    useEffect(()=>{
+        setPlatforms(filterCtx.platforms);
+    }, [filterCtx]);
+    console.log(filterCtx.type)
     function toggleFilter() {
         setIsFilterOpen(prevState => !prevState)
     }
@@ -49,17 +56,17 @@ const Filter = () => {
                     <div className="my-2 space-x-1">
                         <Button
                             onClick={() => filterCtx.updatePlatform("codeforces")}
-                            className={`rounded-2xl cursor-pointer ${filterCtx.type.includes("codeforces") ? "hover:bg-gray-700 hover:dark:bg-gray-400" : "bg-slate-300 text-gray-600 hover:bg-slate-400/70  dark:bg-gray-600/40 dark:text-gray-400 hover:dark:bg-gray-600/50"} `}>
+                            className={`rounded-2xl cursor-pointer ${platforms.includes("codeforces") ? "hover:bg-gray-700 hover:dark:bg-gray-400" : "bg-slate-300 text-gray-600 hover:bg-slate-400/70  dark:bg-gray-600/40 dark:text-gray-400 hover:dark:bg-gray-600/50"} `}>
                             Codeforces
                         </Button>
                         <Button
                             onClick={() => filterCtx.updatePlatform("codechef")}
-                            className={`rounded-2xl cursor-pointer ${filterCtx.type.includes("codechef") ? "hover:bg-gray-700 hover:dark:bg-gray-400" : "bg-slate-300 text-gray-600 hover:bg-slate-400/70  dark:bg-gray-600/40 dark:text-gray-400 hover:dark:bg-gray-600/50"} `}>
+                            className={`rounded-2xl cursor-pointer ${platforms.includes("codechef") ? "hover:bg-gray-700 hover:dark:bg-gray-400" : "bg-slate-300 text-gray-600 hover:bg-slate-400/70  dark:bg-gray-600/40 dark:text-gray-400 hover:dark:bg-gray-600/50"} `}>
                             Codechef
                         </Button>
                         <Button
                             onClick={() => filterCtx.updatePlatform("leetcode")}
-                            className={`rounded-2xl cursor-pointer ${filterCtx.type.includes("leetcode") ? "hover:bg-gray-700 hover:dark:bg-gray-400" : "bg-slate-300 text-gray-600 hover:bg-slate-400/70  dark:bg-gray-600/40 dark:text-gray-400 hover:dark:bg-gray-600/50"} `}>
+                            className={`rounded-2xl cursor-pointer ${platforms.includes("leetcode") ? "hover:bg-gray-700 hover:dark:bg-gray-400" : "bg-slate-300 text-gray-600 hover:bg-slate-400/70  dark:bg-gray-600/40 dark:text-gray-400 hover:dark:bg-gray-600/50"} `}>
                             Leetcode
                         </Button>
 
