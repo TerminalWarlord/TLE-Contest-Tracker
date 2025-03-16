@@ -1,4 +1,5 @@
 import { prismaClient } from "./db";
+import { mapWithYoutubePlaylist } from "./youtube";
 
 const codeforces = async () => {
     try {
@@ -38,14 +39,31 @@ const codeforces = async () => {
             })
             .map(async (res: any) => {
                 try {
+
+                    // Check if the contest has ended
+                    const currentTimeInUnix = Math.floor((Date.now() / 1000))
+                    const hasEnded = res.startTimeSeconds < currentTimeInUnix;
+
+                    // Basic contest data
+                    const title = res.name;
+                    const startsAt = res.startTimeSeconds;
+                    const duration = res.durationSeconds;
+                    const url = "https://codeforces.com/contest/" + res.id;
+
+                    // Get the appropiate yt url
+                    const youtubeUrl = await mapWithYoutubePlaylist("CODEFORCES", title, url);
+
+
                     // Store the new contests to the DB
                     await prismaClient.contest.create({
                         data: {
-                            duration: res.durationSeconds,
-                            startsAt: res.startTimeSeconds,
-                            title: res.name,
-                            url: "https://codeforces.com/contest/" + res.id,
-                            platform: "CODEFORCES"
+                            hasEnded,
+                            duration,
+                            startsAt,
+                            title,
+                            url,
+                            platform: "CODEFORCES",
+                            youtube_url: youtubeUrl?.videoId
                         }
                     });
                 }

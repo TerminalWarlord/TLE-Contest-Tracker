@@ -21,13 +21,15 @@ model User {
 }
 
 model Contest {
-  id       Int        @id @default(autoincrement())
-  title    String
-  platform Platform   @default(CODEFORCES)
-  url      String     @unique
-  startsAt Int
-  duration Int
-  bookmark Bookmark[]
+  id          Int        @id @default(autoincrement())
+  title       String
+  platform    Platform   @default(CODEFORCES)
+  url         String     @unique
+  startsAt    Int
+  duration    Int
+  youtube_url String?
+  hasEnded    Boolean    @default(false)
+  bookmark    Bookmark[]
 }
 
 model Bookmark {
@@ -36,4 +38,11 @@ model Bookmark {
   contest   Contest @relation(fields: [contestId], references: [id])
   userId    Int
   user      User    @relation(fields: [userId], references: [id])
+}
+
+model Video {
+  id          String   @id
+  title       String
+  description String?
+  platform    Platform @default(CODEFORCES)
 }
