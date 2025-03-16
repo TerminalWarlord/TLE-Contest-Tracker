@@ -2,10 +2,11 @@ import { prismaClient } from "./db";
 import { getUnixTime } from "./helper";
 
 
-const codechef = async () => {
+const codechef = async (offset: number = 0) => {
+    console.log("fetching codechef, offset", offset)
     try {
         // Get the list of all CC contests
-        const res = await fetch("https://www.codechef.com/api/list/contests/past?sort_by=START&sorting_order=desc&offset=0&mode=all");
+        const res = await fetch(`https://www.codechef.com/api/list/contests/past?sort_by=START&sorting_order=desc&offset=${offset}&mode=all`);
 
 
         // bad status code, raise error
@@ -15,6 +16,10 @@ const codechef = async () => {
 
         // get the result 
         const results = (await res.json()).contests;
+
+        if(!results.length){
+            return;
+        }
 
         // get the exisiting CC contests that are already in the DB
         const existingContest = await prismaClient.contest.findMany({
@@ -65,6 +70,10 @@ const codechef = async () => {
                     console.log(err);
                 }
             }));
+        // NOT THE BEST IDEA BUT Recursively add 500 contests to the DB
+        // if (offset <= 500) {
+        await codechef(offset + 20);
+        // }
     }
     catch (err) {
         console.log(err);

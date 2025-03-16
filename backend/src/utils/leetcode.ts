@@ -1,9 +1,33 @@
 import { prismaClient } from "./db";
-import { getUnixTime } from "./helper";
 
 
-const leetcode = async () => {
-    console.log("fetching LEETCODE")
+
+const twoTopContests = async () => {
+    try {
+        const res = await fetch("https://leetcode.com/graphql/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Referrer": "https://leetcode.com"
+            },
+            body: JSON.stringify({
+                "query": "query topTwoContests { topTwoContests { title titleSlug startTime duration } }",
+                "operationName": "topTwoContests"
+            })
+        });
+        if (!res.ok) {
+            return [];
+        }
+        const resData = (await res.json()).data.topTwoContests;
+        return resData;
+    }
+    catch (err) {
+        return []
+    }
+}
+
+const leetcode = async (page: number = 1) => {
+    console.log("fetching LEETCODE, Page ", page)
     try {
         // Get the list of all LC contests
         // It uses graphQL
@@ -16,21 +40,35 @@ const leetcode = async () => {
             body: JSON.stringify({
                 "query": "query pastContests($pageNo: Int, $numPerPage: Int) { pastContests(pageNo: $pageNo, numPerPage: $numPerPage) { pageNum currentPage totalNum numPerPage data { title titleSlug startTime duration } } }",
                 "variables": {
-                    "pageNo": 1
+                    "pageNo": page
                 },
                 "operationName": "pastContests"
             })
         });
 
-        console.log(await res.json())
+        // Read the response
+        const resData = await res.json();
+
+
+
+
         // bad status code, raise error
         if (!res.ok) {
-            console.log(await res.json())
+            console.log(resData)
             throw Error("Failed to get Leetcode contests");
         }
 
+        // Calculate total number of pages to go through
+        const totalPages = Math.ceil((resData.data.pastContests.totalNum) / 10);
+
+
         // get the result 
-        const results = (await res.json()).data.pastContests.data;
+        const results = resData.data.pastContests.data;
+
+        // results array dont contain upcoming contests, so we have fetch
+        // them separately and merge them with results
+        const upcomingContests = await twoTopContests();
+        results.push(...upcomingContests);
 
         // get the exisiting CC contests that are already in the DB
         const existingContest = await prismaClient.contest.findMany({
@@ -51,14 +89,13 @@ const leetcode = async () => {
         await Promise.all(results
             .filter((res: any) => {
                 // filter out the exisiting contests
-                const url = "https://leetcode.com/contest/" + res.contest_code;
+                const url = "https://leetcode.com/contest/" + res.titleSlug;
                 return !existingUrls.includes(url);
             })
             .map(async (res: any) => {
-                console.log(res)
                 try {
                     // Format the contest data
-                    const url = "https://leetcode.com/contest/" + res.contest_code;
+                    const url = "https://leetcode.com/contest/" + res.titleSlug;
 
                     // Store the new contests to the DB
                     await prismaClient.contest.create({
@@ -76,11 +113,19 @@ const leetcode = async () => {
                     console.log(err);
                 }
             }));
+
+        // NOT THE BEST IDEA BUT Recursively add contests from 100 pages to the DB
+        if (page <= totalPages) {
+            await leetcode(page + 1);
+        }
     }
     catch (err) {
         console.log(err);
     }
 }
+
+
+
 
 
 export default leetcode;
