@@ -55,18 +55,18 @@ const Filter = () => {
                 <div className="flex justify-between items-center">
                     <div className="my-2 space-x-1">
                         <Button
-                            onClick={() => filterCtx.updatePlatform("codeforces")}
-                            className={`rounded-2xl cursor-pointer ${platforms.includes("codeforces") ? "hover:bg-gray-700 hover:dark:bg-gray-400" : "bg-slate-300 text-gray-600 hover:bg-slate-400/70  dark:bg-gray-600/40 dark:text-gray-400 hover:dark:bg-gray-600/50"} `}>
+                            onClick={() => filterCtx.updatePlatform("CODEFORCES")}
+                            className={`rounded-2xl cursor-pointer ${platforms.includes("CODEFORCES") ? "hover:bg-gray-700 hover:dark:bg-gray-400" : "bg-slate-300 text-gray-600 hover:bg-slate-400/70  dark:bg-gray-600/40 dark:text-gray-400 hover:dark:bg-gray-600/50"} `}>
                             Codeforces
                         </Button>
                         <Button
-                            onClick={() => filterCtx.updatePlatform("codechef")}
-                            className={`rounded-2xl cursor-pointer ${platforms.includes("codechef") ? "hover:bg-gray-700 hover:dark:bg-gray-400" : "bg-slate-300 text-gray-600 hover:bg-slate-400/70  dark:bg-gray-600/40 dark:text-gray-400 hover:dark:bg-gray-600/50"} `}>
+                            onClick={() => filterCtx.updatePlatform("CODECHEF")}
+                            className={`rounded-2xl cursor-pointer ${platforms.includes("CODECHEF") ? "hover:bg-gray-700 hover:dark:bg-gray-400" : "bg-slate-300 text-gray-600 hover:bg-slate-400/70  dark:bg-gray-600/40 dark:text-gray-400 hover:dark:bg-gray-600/50"} `}>
                             Codechef
                         </Button>
                         <Button
-                            onClick={() => filterCtx.updatePlatform("leetcode")}
-                            className={`rounded-2xl cursor-pointer ${platforms.includes("leetcode") ? "hover:bg-gray-700 hover:dark:bg-gray-400" : "bg-slate-300 text-gray-600 hover:bg-slate-400/70  dark:bg-gray-600/40 dark:text-gray-400 hover:dark:bg-gray-600/50"} `}>
+                            onClick={() => filterCtx.updatePlatform("LEETCODE")}
+                            className={`rounded-2xl cursor-pointer ${platforms.includes("LEETCODE") ? "hover:bg-gray-700 hover:dark:bg-gray-400" : "bg-slate-300 text-gray-600 hover:bg-slate-400/70  dark:bg-gray-600/40 dark:text-gray-400 hover:dark:bg-gray-600/50"} `}>
                             Leetcode
                         </Button>
 

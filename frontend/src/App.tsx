@@ -1,14 +1,26 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import './App.css'
-import Home from './components/Home';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from './components/theme-provider';
+import Home from './pages/Home';
+import Authentication from './pages/Authentication';
 
 
 const queryClient = new QueryClient();
 
 const routes = createBrowserRouter([
-  { path: '/', element: <Home /> }
+  {
+    path: '/', children: [
+      { index: true, element: <Home /> },
+      {
+        path: 'auth', children: [
+          { index: true, element: <Authentication /> },
+          { path: ':mode', element: <Authentication /> }
+        ]
+      }
+    ]
+  },
+
 ])
 
 function App() {

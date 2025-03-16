@@ -1,21 +1,25 @@
-import Contests from './Contests'
-import Filter from './Filter'
-import NavBar from './NavBar'
-import Footer from './Footer';
+import Filter from '../components/Filter'
+import NavBar from '../components/NavBar'
+import Footer from '../components/Footer';
 import { FilterType, PlatformType } from '@/types/contest';
 import { useState } from 'react';
 import { FilterContext } from '@/store/filter-context';
+import Contests from '@/components/Contests';
+
+
+const INITIAL_PLATFORMS: PlatformType[] = ["CODEFORCES", "CODECHEF", "LEETCODE"];
+
 
 const Home = () => {
   const [currentFilter, setCurrentFilter] = useState<FilterType>("upcoming");
-  const [selectedPlatforms, setSelectedPlatform] = useState<PlatformType[]>(["codeforces", "codechef", "leetcode"])
+  const [selectedPlatforms, setSelectedPlatform] = useState<PlatformType[]>(INITIAL_PLATFORMS)
 
   function handleFilterChange(val: FilterType) {
     setCurrentFilter(val);
   }
 
   function resetPlatforms() {
-    setSelectedPlatform(["codeforces", "codechef", "leetcode"]);
+    setSelectedPlatform(INITIAL_PLATFORMS);
   }
   console.log(selectedPlatforms);
   console.log(currentFilter);
@@ -55,7 +59,7 @@ const Home = () => {
           Track programming contests from Codeforces, CodeChef, and LeetCode. Never miss a contest again!</p>
       </div>
       <FilterContext.Provider value={ctxValue}>
-        <Filter/>
+        <Filter />
         <Contests />
       </FilterContext.Provider>
       <Footer />

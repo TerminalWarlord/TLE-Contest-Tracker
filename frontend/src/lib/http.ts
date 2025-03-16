@@ -1,5 +1,5 @@
 import { Contest, FilterType, PlatformType } from "@/types/contest";
-
+import axios from "axios";
 
 
 const DUMMY_CONTESTS = [
@@ -68,16 +68,40 @@ const DUMMY_CONTESTS = [
     },
 ];
 
-export const getContests = async (offset: number = 0, limit: number = 10, platforms: PlatformType[] = ["codeforces", "codechef", "leetcode"], filterType: FilterType = "upcoming") => {
+export const getContests = async (offset: number = 0, limit: number = 10, platforms: PlatformType[] = ["CODEFORCES", "CODECHEF", "LEETCODE"], filterType: FilterType = "upcoming") => {
+    console.log("fetching")
+    try {
+        const params = new URLSearchParams({
+            offset: String(offset),
+            limit: String(limit),
+            platforms: platforms.join(','), 
+            filterType: String(filterType)
+        }).toString();
 
+        const res = await fetch(`http://localhost:3000/v1/contests?${params}`);
 
-    await new Promise(resolve => setTimeout(resolve, 100));
+        if (!res.ok) {
+            console.log(await res.json());
 
-    return {
-        offset,
-        limit,
-        contests: DUMMY_CONTESTS.filter((contest) => platforms.includes((contest as unknown as Contest).platform))
-    };
+            throw Error("Failed to get contest");
+        }
+        const resData = await res.json();
+        return {
+            offset,
+            limit,
+            ...resData
+        };
+    }
+    catch (err) {
+        console.log(err)
+        throw Error("Failed to get contest");
+    }
+
+    // return {
+    //     offset,
+    //     limit,
+    //     contests: DUMMY_CONTESTS.filter((contest) => platforms.includes((contest as unknown as Contest).platform))
+    // };
 }
 
 
@@ -100,18 +124,13 @@ export const getToken = () => {
 
 export const getUserDetails = async () => {
     try {
-        // const { data } = await axios.get("http://localhost:3001", {
-        //     headers: {
-
-        //         Authorization: `Bearer ${getToken()}`
-        //     }
-        // });
+        const { data } = await axios.get("http://localhost:3000/v1/me", {
+            headers: {
+                Authorization: `Bearer ${getToken()}`
+            }
+        });
         // throw Error("User not authenticated");
-        return {
-            userId: 1,
-            username: "jaybee",
-            email: "jaybee@joybiswas.com"
-        }
+        return data;
     }
     catch (err) {
         return null;

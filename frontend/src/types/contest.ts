@@ -1,19 +1,20 @@
 
 
 export enum Platform {
-    codeforces = "codeforces",
-    leetcode = "leetcode",
-    codechef = "codechef"
+    CODEFORCES = "CODEFORCES",
+    LEETCODE = "LEETCODE",
+    CODECHEF = "CODECHEF"
 };
 
 export interface Contest {
     id: number;
     platform: Platform;
-    startsAt: Date;
+    startsAt: number;
     duration: number;
-    contestTitle: string;
+    title: string;
     hasEnded?: boolean; 
+    youtubeUrl?: string;
 }
 
 export type FilterType = "upcoming" | "past";
-export type PlatformType = "codeforces" | "codechef" | "leetcode";
+export type PlatformType = "CODEFORCES" | "CODECHEF" | "LEETCODE";

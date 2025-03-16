@@ -53,7 +53,7 @@ const Contests = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" style={{
                 animation: "slideUp 1s ease-in-out forwards"
             }}>
-                {data.contests.map((contest) => {
+                {data.contests.map((contest:any) => {
                     return <ContestCard key={contest.id} contest={contest as unknown as Contest} />
                 })}
             </div >
