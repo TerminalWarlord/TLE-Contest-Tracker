@@ -1,4 +1,5 @@
 import { prismaClient } from "./db";
+import { mapWithYoutubePlaylist } from "./youtube";
 
 
 
@@ -96,15 +97,28 @@ const leetcode = async (page: number = 1) => {
                 try {
                     // Format the contest data
                     const url = "https://leetcode.com/contest/" + res.titleSlug;
+                    const title = res.title;
+                    const duration = res.duration;
+                    const startsAt = res.startTime;
+
+                    // Check if the contest has ended
+                    const currentTimeInUnix = Math.floor((Date.now() / 1000))
+                    const hasEnded = startsAt < currentTimeInUnix;
+
+                    // Get the appropiate yt url
+                    const youtubeUrl = await mapWithYoutubePlaylist("LEETCODE", title, url);
+
 
                     // Store the new contests to the DB
                     await prismaClient.contest.create({
                         data: {
                             url,
-                            duration: res.duration,
-                            startsAt: res.startTime,
-                            title: res.title,
-                            platform: "LEETCODE"
+                            duration,
+                            hasEnded,
+                            startsAt,
+                            title,
+                            platform: "LEETCODE",
+                            youtubeUrl: youtubeUrl?.id
                         }
                     });
                 }

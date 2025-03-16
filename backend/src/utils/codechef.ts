@@ -1,5 +1,6 @@
 import { prismaClient } from "./db";
 import { getUnixTime } from "./helper";
+import { mapWithYoutubePlaylist } from "./youtube";
 
 
 const codechef = async (offset: number = 0) => {
@@ -17,7 +18,7 @@ const codechef = async (offset: number = 0) => {
         // get the result 
         const results = (await res.json()).contests;
 
-        if(!results.length){
+        if (!results.length) {
             return;
         }
 
@@ -45,6 +46,7 @@ const codechef = async (offset: number = 0) => {
             })
             .map(async (res: any) => {
                 try {
+                    const title = res.contest_name;
                     // Format the contest data
                     const url = "https://www.codechef.com/" + res.contest_code;
 
@@ -54,15 +56,26 @@ const codechef = async (offset: number = 0) => {
                     // Convert the duration from minutes to seconds
                     const duration = parseInt(res.contest_duration) * 60;
 
+                    // Check if the contest has ended
+                    const currentTimeInUnix = Math.floor((Date.now() / 1000))
+                    const hasEnded = startsAt < currentTimeInUnix;
+
+                    // Get the appropiate yt url
+                    // spliting the title at "(" because the pattern of CC is
+                    // Starters 1xx (Rated till X stars)
+                    const youtubeUrl = await mapWithYoutubePlaylist("CODECHEF", title.split('(')[0], url);
+
 
                     // Store the new contests to the DB
                     await prismaClient.contest.create({
                         data: {
+                            title,
                             url,
+                            hasEnded,
                             duration: duration,
                             startsAt: startsAt,
-                            title: res.contest_name,
-                            platform: "CODECHEF"
+                            platform: "CODECHEF",
+                            youtubeUrl: youtubeUrl?.id
                         }
                     });
                 }

@@ -15,10 +15,9 @@ const getPlaylistId = (platform: PlatformType) => {
 }
 
 
-const fetchPlaylist = async (platform: PlatformType): Promise<YoutubeResult[]> => {
+const fetchPlaylist = async (platform: PlatformType) => {
     const playlistId = getPlaylistId(platform);
     const API_KEY = process.env.YOUTUBE_API_KEY || "";
-    const results: YoutubeResult[] = [];
     let nextPageToken = null;
 
 
@@ -86,8 +85,6 @@ const fetchPlaylist = async (platform: PlatformType): Promise<YoutubeResult[]> =
     catch (err) {
         console.log("Failed to get playlist items");
     }
-
-    return results;
 }
 
 
@@ -98,13 +95,20 @@ const mapWithYoutubePlaylist = async (platform: PlatformType, contestTitle: stri
     // TLE Eliminator's playlists, but for the time being I will implement simple js methods
     // I will implement vector embedding semantic search later
 
-    const videos = await fetchPlaylist(platform);
+
+    // Fetch the videos for a specific platform and look for a match
+    const videos = await prismaClient.video.findMany({
+        where: {
+            platform: platform
+        }
+    });
 
     const video = videos.find(vid => {
-        const videoTitle = vid.videoTitle.toLocaleLowerCase();
-        const videoDesc = vid.videoDescription.toLocaleLowerCase();
+        const videoTitle = vid.title.toLocaleLowerCase();
+        const videoDesc = (vid.description || "").toLocaleLowerCase();
         const lowerCasedContestTitle = contestTitle.toLocaleLowerCase();
 
+        console.log(videoTitle,lowerCasedContestTitle, videoTitle.includes(lowerCasedContestTitle))
 
         // check if contest title matches the video title or description
         // or contest link mentioned in the video description, it will be the case for codeforces
@@ -120,12 +124,13 @@ const mapWithYoutubePlaylist = async (platform: PlatformType, contestTitle: stri
 // This should be executed as a cron job, but for the time being we will use it in out script
 // Or we can expose and endpoint and hit it every 24hrs to update the playlist content in the database
 const populateDbWithVideos = async () => {
-    await fetchPlaylist("CODEFORCES");
-    await fetchPlaylist("CODECHEF");
+    // await fetchPlaylist("CODEFORCES");
+    // await fetchPlaylist("CODECHEF");
     await fetchPlaylist("LEETCODE");
 }
 
 
 export {
-    mapWithYoutubePlaylist
+    mapWithYoutubePlaylist,
+    populateDbWithVideos
 };

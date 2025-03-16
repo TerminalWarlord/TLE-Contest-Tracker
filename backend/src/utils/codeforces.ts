@@ -40,15 +40,16 @@ const codeforces = async () => {
             .map(async (res: any) => {
                 try {
 
-                    // Check if the contest has ended
-                    const currentTimeInUnix = Math.floor((Date.now() / 1000))
-                    const hasEnded = res.startTimeSeconds < currentTimeInUnix;
-
+                    
                     // Basic contest data
                     const title = res.name;
                     const startsAt = res.startTimeSeconds;
                     const duration = res.durationSeconds;
                     const url = "https://codeforces.com/contest/" + res.id;
+                    
+                    // Check if the contest has ended
+                    const currentTimeInUnix = Math.floor((Date.now() / 1000))
+                    const hasEnded = startsAt < currentTimeInUnix;
 
                     // Get the appropiate yt url
                     const youtubeUrl = await mapWithYoutubePlaylist("CODEFORCES", title, url);
@@ -63,7 +64,7 @@ const codeforces = async () => {
                             title,
                             url,
                             platform: "CODEFORCES",
-                            youtube_url: youtubeUrl?.videoId
+                            youtubeUrl: youtubeUrl?.id
                         }
                     });
                 }

@@ -17,6 +17,7 @@ model User {
   id       Int        @id @default(autoincrement())
   email    String     @unique
   name     String?
+  password String
   bookmark Bookmark[]
 }
 
@@ -27,7 +28,7 @@ model Contest {
   url         String     @unique
   startsAt    Int
   duration    Int
-  youtube_url String?
+  youtubeUrl String?
   hasEnded    Boolean    @default(false)
   bookmark    Bookmark[]
 }
@@ -38,6 +39,8 @@ model Bookmark {
   contest   Contest @relation(fields: [contestId], references: [id])
   userId    Int
   user      User    @relation(fields: [userId], references: [id])
+
+  @@unique([contestId, userId])
 }
 
 model Video {
