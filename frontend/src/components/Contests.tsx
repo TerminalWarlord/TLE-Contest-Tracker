@@ -5,7 +5,7 @@ import { Loader2 } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "./ui/pagination";
 import { Contest } from "@/types/contest";
-import { useContext, useEffect } from "react";
+import { useContext} from "react";
 import { FilterContext } from "@/store/filter-context";
 
 

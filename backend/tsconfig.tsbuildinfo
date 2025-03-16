@@ -1,1 +1,1 @@
-{"root":["./src/index.ts"],"version":"5.8.2"}
+{"root":["./src/index.ts","./src/controllers/contestcontroller.ts","./src/routes/contests.ts","./src/types/contest.ts","./src/utils/codechef.ts","./src/utils/codeforces.ts","./src/utils/db.ts","./src/utils/helper.ts","./src/utils/leetcode.ts"],"version":"5.8.2"}

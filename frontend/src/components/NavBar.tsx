@@ -26,7 +26,7 @@ const NavBar = () => {
             <div className="flex space-x-2 ">
                 <ModeToggle></ModeToggle>
                 {data ? <>
-                    <Link to="bookmarks" className="py-2 px-3 bg-blue-400/10 rounded-3xl flex space-x-1 items-center">
+                    <Link to="/bookmarks" className="py-2 px-3 outline-1 hover:bg-blue-400/10 rounded-lg flex space-x-1 items-center">
                         <Bookmark size={15} className="text-blue-400" />
                         <p className="text-blue-400 text-sm">Bookmarks</p>
                     </Link>

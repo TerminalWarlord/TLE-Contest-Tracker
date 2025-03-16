@@ -1,0 +1,39 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Platform {
+  CODEFORCES
+  CODECHEF
+  LEETCODE
+}
+
+model User {
+  id       Int        @id @default(autoincrement())
+  email    String     @unique
+  name     String?
+  bookmark Bookmark[]
+}
+
+model Contest {
+  id       Int        @id @default(autoincrement())
+  title    String
+  platform Platform   @default(CODEFORCES)
+  url      String     @unique
+  startsAt Int
+  duration Int
+  bookmark Bookmark[]
+}
+
+model Bookmark {
+  id        Int     @id @default(autoincrement())
+  contestId Int
+  contest   Contest @relation(fields: [contestId], references: [id])
+  userId    Int
+  user      User    @relation(fields: [userId], references: [id])
+}
