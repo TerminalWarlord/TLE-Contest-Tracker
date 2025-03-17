@@ -5,7 +5,7 @@ import { CircleSlash2, Loader2 } from "lucide-react";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "./ui/pagination";
 import { Contest } from "@/types/contest";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { FilterContext } from "@/store/filter-context";
 
 
@@ -17,14 +17,30 @@ const Contests = () => {
     const isBookmark = location.pathname.includes('bookmarks');
     console.log(location.pathname, isBookmark);
 
-    const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "10");
+    const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get("page") || "0"))
+    const [offset, setOffset] = useState(parseInt(searchParams.get("offset") || "0"));
     const filterCtx = useContext(FilterContext);
     const { data, error, isPending } = useQuery({
-        queryKey: ['contests', page - 1, limit, filterCtx.platforms, filterCtx.type, isBookmark],
-        queryFn: () => getContests(page - 1, limit, filterCtx.platforms, filterCtx.type, isBookmark),
+        queryKey: ['contests', offset, 20, filterCtx.platforms, filterCtx.type, isBookmark],
+        queryFn: () => getContests(offset, 20, filterCtx.platforms, filterCtx.type, isBookmark),
         staleTime: 5 * 60 * 1000
     });
+
+
+    const handleNavigation = (identifier: "next" | "prev") => {
+        if (data && data.hasNextPage && identifier === "next") {
+            setCurrentPage(prevPage => prevPage + 1);
+            setOffset(prevOffset => prevOffset + 20);
+        }
+        if (identifier === "prev") {
+            setCurrentPage(prevPage => {
+                if (prevPage > 0) {
+                    setOffset(prevOffset => prevOffset - 20);
+                }
+                return prevPage > 0 ? prevPage - 1 : 0;
+            });
+        }
+    }
 
 
 
@@ -72,11 +88,18 @@ const Contests = () => {
             <Pagination className="flex w-full justify-end items-end my-2">
                 <PaginationContent>
                     <PaginationItem>
-                        <PaginationPrevious href="#" />
+                        <PaginationPrevious
+                            className={`${currentPage > 0 ? 'cursor-pointer' : 'cursor-not-allowed'}`}
+                            onClick={() => handleNavigation("prev")}
+                        />
                     </PaginationItem>
                     <PaginationItem>
-                        <PaginationNext href="#" />
+                        <PaginationNext
+                            className={`${data.hasNextPage ? 'cursor-pointer' : 'cursor-not-allowed'}`}
+                            onClick={() => handleNavigation("next")}
+                        />
                     </PaginationItem>
+
                 </PaginationContent>
             </Pagination>
         </>

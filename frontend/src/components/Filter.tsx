@@ -10,6 +10,7 @@ const Filter = () => {
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const filterCtx = useContext(FilterContext);
 
+    // TODO: Fix platform buttons
     const [platforms, setPlatforms] = useState<PlatformType[]>(filterCtx.platforms);
     
     useEffect(()=>{

@@ -14,10 +14,14 @@ const routes = createBrowserRouter([
   {
     path: '/', children: [
       { index: true, element: <Home /> },
+      { path: "page/:page", element: <Home /> },
       {
         path: 'bookmarks',
-        element: <Bookmark />,
-        loader: authLoader
+        loader: authLoader,
+        children: [
+          { index: true, element: <Bookmark /> },
+          { path: "page/:page", element: <Bookmark /> },
+        ]
       },
       {
         path: 'auth', children: [
