@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../config";
 import { prismaClient } from "../utils/db";
 import { PlatformType } from "../types/contest";
+import { getUserIdFromHeader } from "../utils/helper";
 
 
 interface CustomRequest extends Request {
@@ -10,32 +11,33 @@ interface CustomRequest extends Request {
 }
 
 const authWall = async (req: CustomRequest, res: Response, next: NextFunction) => {
-    const authHeader = req.headers.authorization as string;
+    // const authHeader = req.headers.authorization as string;
 
-    // If no authorization header is set, return
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        res.status(403).json({
-            message: "Unauthorized"
-        });
-        return;
-    }
+    // // If no authorization header is set, return
+    // if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    //     res.status(403).json({
+    //         message: "Unauthorized"
+    //     });
+    //     return;
+    // }
 
-    // Split and take the portion after "Bearer "
-    const token = authHeader.split(" ")[1];
+    // // Split and take the portion after "Bearer "
+    // const token = authHeader.split(" ")[1];
 
 
-    // Now verify the token's validity
-    try {
-        const decodedToken = jwt.verify(token, JWT_SECRET) as { userId: number };
-        req.userId = decodedToken.userId;
-    }
-    catch (err) {
-        // JWT throws error if the token is invalid
-        res.status(403).json({
-            message: "Invalid token!"
-        });
-        return;
-    }
+    // // Now verify the token's validity
+    // try {
+    //     const decodedToken = jwt.verify(token, JWT_SECRET) as { userId: number };
+    //     req.userId = decodedToken.userId;
+    // }
+    // catch (err) {
+    //     // JWT throws error if the token is invalid
+    //     res.status(403).json({
+    //         message: "Invalid token!"
+    //     });
+    //     return;
+    // }
+    getUserIdFromHeader(req, res);
     next();
 }
 
@@ -56,41 +58,55 @@ const bookmarkController = async (req: CustomRequest, res: Response) => {
         });
         return;
     }
-    const bookmark = await prismaClient.bookmark.findFirst({
-        where: {
-            contestId: contestId,
-            userId: userId
-        }
-    })
-    if (bookmark) {
-        const newBookmark = await prismaClient.bookmark.create({
-            data: {
+    try{
+        const bookmark = await prismaClient.bookmark.findFirst({
+            where: {
                 contestId: contestId,
                 userId: userId
             }
-        });
-        res.json({
-            message: "Successfully added contest to the bookmark!",
-            bookmark: newBookmark
         })
-        return;
+        if (!bookmark) {
+            const newBookmark = await prismaClient.bookmark.create({
+                data: {
+                    contestId: contestId,
+                    userId: userId
+                }
+            });
+            res.json({
+                message: "Successfully added contest to the bookmark!",
+                bookmark: newBookmark
+            })
+            return;
+        } 
+        else {
+            await prismaClient.bookmark.delete({
+                where: {
+                    id: bookmark.id
+                }
+            });
+            res.json({
+                message: "Successfully removed bookmark!",
+            })
+        }
+    
+    }
+    catch(err){
+        res.status(500).json({
+            message: "Failed to make a database query!"
+        })
     }
 
-
-    res.json({
-        message: "Successfully removed bookmark!",
-    })
 
 }
 
 const getBookmarks = async (req: CustomRequest, res: Response) => {
     const userId = req.userId;
     const { offset = 0, limit = 10, platforms, filterType }:
-        { offset: number, limit: number, platforms: string[], filterType: string } = req.body;
+        { offset: number, limit: number, platforms: string, filterType: string } = req.body;
 
 
     // Convert list of string to list of PlatformType
-    const typedPlatform = platforms.map(platform => platform as PlatformType);
+    const typedPlatform = platforms.split(',').map(platform => platform as PlatformType);
 
 
     const whereClause = {

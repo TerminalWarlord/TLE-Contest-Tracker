@@ -1,5 +1,6 @@
-import { Contest, FilterType, PlatformType } from "@/types/contest";
+import { Contest, ContestParamsType, FilterType, PlatformType } from "@/types/contest";
 import axios from "axios";
+import { getToken } from "./auth";
 
 
 const DUMMY_CONTESTS = [
@@ -68,21 +69,27 @@ const DUMMY_CONTESTS = [
     },
 ];
 
-export const getContests = async (offset: number = 0, limit: number = 10, platforms: PlatformType[] = ["CODEFORCES", "CODECHEF", "LEETCODE"], filterType: FilterType = "upcoming") => {
+export const getContests = async (offset: number = 0, limit: number = 10, platforms: PlatformType[] = ["CODEFORCES", "CODECHEF", "LEETCODE"], filterType: FilterType = "upcoming", isBookmark = false) => {
     console.log("fetching")
     try {
-        const params = new URLSearchParams({
+        const paramsObj: ContestParamsType = {
             offset: String(offset),
             limit: String(limit),
-            platforms: platforms.join(','), 
-            filterType: String(filterType)
-        }).toString();
+            platforms: platforms.join(','),
+            filterType: String(filterType),
+        };
+        if (isBookmark) {
+            paramsObj.isBookmark = String(true);
+        }
+        const params = new URLSearchParams(paramsObj as unknown as string).toString();
 
-        const res = await fetch(`http://localhost:3000/v1/contests?${params}`);
+        const options = isBookmark ? {
+            headers: { "Authorization": "Bearer " + getToken() }
+        } : undefined;
+        const res = await fetch(`http://localhost:3000/v1/contests?${params}`, options);
 
         if (!res.ok) {
             console.log(await res.json());
-
             throw Error("Failed to get contest");
         }
         const resData = await res.json();
@@ -104,35 +111,3 @@ export const getContests = async (offset: number = 0, limit: number = 10, platfo
     // };
 }
 
-
-export const getToken = () => {
-    const token = localStorage.getItem("token");
-
-    return token;
-    // if(!token){}
-    // intentionally hard coding this for testing
-    // return {
-    //     userId: 1,
-    //     username: "jaybee",
-    //     email: "jaybee@joybiswas.com"
-    // }
-}
-
-
-
-
-
-export const getUserDetails = async () => {
-    try {
-        const { data } = await axios.get("http://localhost:3000/v1/me", {
-            headers: {
-                Authorization: `Bearer ${getToken()}`
-            }
-        });
-        // throw Error("User not authenticated");
-        return data;
-    }
-    catch (err) {
-        return null;
-    }
-}

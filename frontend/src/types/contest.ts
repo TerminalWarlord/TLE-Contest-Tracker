@@ -12,9 +12,20 @@ export interface Contest {
     startsAt: number;
     duration: number;
     title: string;
-    hasEnded?: boolean; 
+    hasEnded?: boolean;
     youtubeUrl?: string;
+    url: string;
+    isBookmarked: boolean
 }
 
 export type FilterType = "upcoming" | "past";
 export type PlatformType = "CODEFORCES" | "CODECHEF" | "LEETCODE";
+
+
+export interface ContestParamsType {
+    offset: string;
+    limit: string;
+    platforms: string;
+    filterType: string;
+    isBookmark?: string;
+}

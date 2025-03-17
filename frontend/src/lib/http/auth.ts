@@ -1,4 +1,3 @@
-import { redirect } from "react-router-dom";
 import axios from "axios";
 
 
@@ -57,3 +56,27 @@ export const signUp = async (formData: FormData) => {
 }
 
 
+
+export const getToken = () => {
+    const token = localStorage.getItem("token");
+    return token;
+}
+
+
+
+
+
+export const getUserDetails = async () => {
+    try {
+        const { data } = await axios.get("http://localhost:3000/v1/me", {
+            headers: {
+                Authorization: `Bearer ${getToken()}`
+            }
+        });
+        // throw Error("User not authenticated");
+        return data;
+    }
+    catch (err) {
+        return null;
+    }
+}

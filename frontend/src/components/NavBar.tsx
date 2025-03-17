@@ -1,8 +1,8 @@
 import { Bookmark, Calendar } from "lucide-react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ModeToggle } from "./mode-toggle";
 import { useQuery } from "@tanstack/react-query";
-import { getUserDetails } from "@/lib/http";
+import { getUserDetails } from "@/lib/http/auth";
 import { Button } from "./ui/button";
 import { useEffect, useState } from "react";
 
@@ -34,10 +34,10 @@ const NavBar = () => {
 
     return (
         <div className="flex justify-between w-full px-4 py-2 bg-slate-300/10 fixed top-0 backdrop-blur-xs z-10">
-            <div className="flex justify-center items-center space-x-1">
+            <Link to="/" className="flex justify-center items-center space-x-1">
                 <Calendar className="text-blue-500" />
                 <p className="font-semibold text-xl" >TLE Contest Tracker</p>
-            </div>
+            </Link>
             <div className="flex space-x-2 ">
                 <ModeToggle></ModeToggle>
                 {isLoggedIn && data ? <>

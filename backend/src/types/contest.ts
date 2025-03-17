@@ -13,6 +13,7 @@ export interface Contest {
     duration: number;
     contestTitle: string;
     hasEnded?: boolean; 
+    isBookmarked: boolean
 }
 
 export type FilterType = "upcoming" | "past";
