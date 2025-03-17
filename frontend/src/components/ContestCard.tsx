@@ -1,9 +1,12 @@
 import { formatDateTime, formatTime, timeDifference } from "@/lib/formatter";
 import { Bookmark, SquareArrowOutUpRight } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import youtubeIcon from "../assets/youtube.svg";
 import { Contest } from "@/types/contest";
 import { updateBookmark } from "@/lib/http/bookmarks";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useSearchParams } from "react-router-dom";
+import { FilterContext } from "@/store/filter-context";
 
 interface RemainingTime {
     hours: string;
@@ -14,12 +17,29 @@ interface RemainingTime {
 
 
 const ContestCard = ({ contest }: { contest: Contest }) => {
-
+    const queryClient = useQueryClient();
+    const [searchParams] = useSearchParams();
     const [isBookmarked, setIsBookmarked] = useState(contest.isBookmarked);
+    const [offset] = useState(parseInt(searchParams.get("offset") || "0"));
+    const filterCtx = useContext(FilterContext);
 
     const formattedStartTime = formatDateTime(contest.startsAt);
     const [remainingTime, setRemainingTime] = useState<RemainingTime>({ hours: "00", minutes: "00", seconds: "00" });
     const formattedDuration = formatTime(contest.duration);
+
+
+    const { mutate } = useMutation({
+        mutationFn: async (contestId: number) => updateBookmark(contestId),
+        onMutate: async () => {
+            setIsBookmarked(prev => !prev);
+        },
+        onError: (_, __, ___) => {
+            setIsBookmarked(prev => !prev);
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: ["bookmarked-contests", offset, 20, filterCtx.platforms, filterCtx.type] })
+        }
+    })
 
 
     // The API returns UNIX time (in second), but JS need miliseconds to be passed into Date()
@@ -46,17 +66,7 @@ const ContestCard = ({ contest }: { contest: Contest }) => {
 
 
     const handleBookmarkUpdate = async (contestId: number) => {
-        // need to invalidate users bookmarks
-        let bookmarked;
-        setIsBookmarked(prevState => {
-            return bookmarked = !prevState;
-        });
-        try {
-            await updateBookmark(contestId);
-        }
-        catch (err) {
-            setIsBookmarked(!bookmarked);
-        }
+        mutate(contestId);
     }
 
     return (
