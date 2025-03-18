@@ -40,18 +40,16 @@ const getContests = async (req: CustomRequest, res: Response) => {
             bookmark: {}
         };
 
-
+        // If the request is for user bookmarks, set the userId first using token in the headers
+        // get the user from DB and set in on req 
         if (isBookmark) {
             getUserIdFromHeader(req, res);
-            console.log(req.userId);
-
             whereClause.bookmark = {
                 some: {
                     userId: req.userId
                 }
             }
         }
-        console.log(whereClause);
 
         // If filter filterType is set to past we filter out the contests
         // using current time in Unix and taking contests that started less than 
