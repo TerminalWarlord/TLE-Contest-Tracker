@@ -51,7 +51,7 @@ const Bookmark = () => {
   }
 
   return (
-    <div className='w-full flex flex-col justify-center items-center'>
+    <div className='w-full flex flex-col justify-between items-center  md:min-h-screen'>
       <NavBar />
       <div className='flex flex-col items-center pt-30 pb-10'>
         <h1 className='text-2xl md:text-3xl lg:text-4xl font-bold my-2 text-center'>Upcoming Contests</h1>
