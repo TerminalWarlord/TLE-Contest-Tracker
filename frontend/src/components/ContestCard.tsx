@@ -1,6 +1,6 @@
 import { formatDateTime, formatTime, timeDifference } from "@/lib/formatter";
 import { Bookmark, SquareArrowOutUpRight } from "lucide-react";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import youtubeIcon from "../assets/youtube.svg";
 import { Contest } from "@/types/contest";
 import { updateBookmark } from "@/lib/http/bookmarks";
