@@ -11,7 +11,7 @@ export const getUnixTime = (datetime: string): number => {
 }
 
 
-export const getUserIdFromHeader = (req: CustomRequest, res: Response, next: NextFunction) => {
+export const getUserIdFromHeader = (req: CustomRequest, res: Response) => {
     const authHeader = req.headers.authorization as string;
 
     // If no authorization header is set, return
@@ -38,6 +38,5 @@ export const getUserIdFromHeader = (req: CustomRequest, res: Response, next: Nex
         });
         return;
     }
-    next();
 }
 

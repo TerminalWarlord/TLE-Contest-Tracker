@@ -16,7 +16,7 @@ const NavBar = () => {
 
     const { data, refetch } = useQuery({
         queryKey: ["user"],
-        queryFn: ()=>getUserDetails(userCtx.logIn),
+        queryFn: getUserDetails,
         staleTime: 5 * 60 * 1000,
         enabled: isLoggedIn
     })
@@ -32,9 +32,9 @@ const NavBar = () => {
 
     useEffect(() => {
         if (isLoggedIn) {
-            if(data){
+            if (data) {
                 console.log(data)
-                userCtx.logIn((data as { user: string }).user)
+                userCtx.logIn((data as { role: string }).role)
             }
             refetch();
         }
