@@ -1,11 +1,11 @@
 import axios from "axios";
 
+const API_URL = import.meta.env.VITE_API_URL;
 
 interface LoginResponse {
     message: string;
     token: string;
 }
-
 export const signIn = async (formData: FormData) => {
     const data = Object.fromEntries(formData.entries());
 
@@ -14,7 +14,7 @@ export const signIn = async (formData: FormData) => {
         const email = data.email as string;
         const password = data.password as string;
 
-        const res = await axios.post<LoginResponse>("http://localhost:3000/v1/login", {
+        const res = await axios.post<LoginResponse>(API_URL + "/v1/login", {
             email,
             password
         });
@@ -43,7 +43,7 @@ export const signUp = async (formData: FormData) => {
         const name = data.name as string;
 
 
-        await axios.post<LoginResponse>("http://localhost:3000/v1/signup", {
+        await axios.post<LoginResponse>(API_URL + "/v1/signup", {
             email,
             password,
             name,
@@ -68,7 +68,7 @@ export const getToken = () => {
 
 export const getUserDetails = async () => {
     try {
-        const { data } = await axios.get("http://localhost:3000/v1/me", {
+        const { data } = await axios.get(API_URL + "/v1/me", {
             headers: {
                 Authorization: `Bearer ${getToken()}`
             }

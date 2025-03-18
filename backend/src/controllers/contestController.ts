@@ -1,11 +1,7 @@
 
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Response } from "express";
 import { prismaClient } from "../utils/db";
 import { PlatformType } from "../types/contest";
-import codeforces from "../utils/codeforces";
-import codechef from "../utils/codechef";
-import leetcode from "../utils/leetcode";
-import { populateDbWithVideos } from "../utils/youtube";
 import { getUserIdFromHeader } from "../utils/helper";
 import { CustomRequest } from "../types/user";
 
@@ -19,13 +15,7 @@ export const getContests = async (req: CustomRequest, res: Response, next: NextF
         const parsedOffset = Math.max(parseInt(offset as string, 0), 0);
         const parsedLimit = Math.max(parseInt(limit as string, 10), 20);
 
-        // These should be executed with a CRON job periodically
-        // for the time being I'm keeping them here
 
-        // await populateDbWithVideos();
-        // await codeforces();
-        // await leetcode();
-        // await codechef();
 
         // Convert list of string to list of PlatformType
         const typedPlatform = platforms ? (platforms as string).split(',').map(platform => platform as PlatformType) : [];
