@@ -37,8 +37,7 @@ const authWall = async (req: CustomRequest, res: Response, next: NextFunction) =
     //     });
     //     return;
     // }
-    getUserIdFromHeader(req, res);
-    next();
+    getUserIdFromHeader(req, res, next);
 }
 
 
@@ -158,6 +157,7 @@ const getMe = async (req: CustomRequest, res: Response) => {
                 id: true,
                 email: true,
                 name: true,
+                role: true,
             }
         });
 

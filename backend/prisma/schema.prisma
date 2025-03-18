@@ -13,24 +13,30 @@ enum Platform {
   LEETCODE
 }
 
+enum UserRole {
+  ADMIN
+  USER
+}
+
 model User {
   id       Int        @id @default(autoincrement())
   email    String     @unique
   name     String?
   password String
+  role     UserRole   @default(USER)
   bookmark Bookmark[]
 }
 
 model Contest {
-  id          Int        @id @default(autoincrement())
-  title       String
-  platform    Platform   @default(CODEFORCES)
-  url         String     @unique
-  startsAt    Int
-  duration    Int
+  id         Int        @id @default(autoincrement())
+  title      String
+  platform   Platform   @default(CODEFORCES)
+  url        String     @unique
+  startsAt   Int
+  duration   Int
   youtubeUrl String?
-  hasEnded    Boolean    @default(false)
-  bookmark    Bookmark[]
+  hasEnded   Boolean    @default(false)
+  bookmark   Bookmark[]
 }
 
 model Bookmark {

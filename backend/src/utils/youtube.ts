@@ -44,7 +44,7 @@ const fetchPlaylist = async (platform: PlatformType) => {
 
             // Extract video ID, title and description and push them to results
             resData.items.map((item: any) => {
-                const videoId = item.snippet.resourceId.videoId;
+                const videoId = "https://www.youtube.com/watch?v=" + item.snippet.resourceId.videoId;
                 const videoTitle = item.snippet.title;
                 const videoDescription = item.snippet.description;
 
@@ -108,7 +108,7 @@ const mapWithYoutubePlaylist = async (platform: PlatformType, contestTitle: stri
         const videoDesc = (vid.description || "").toLocaleLowerCase();
         const lowerCasedContestTitle = contestTitle.toLocaleLowerCase();
 
-        console.log(videoTitle,lowerCasedContestTitle, videoTitle.includes(lowerCasedContestTitle))
+        console.log(videoTitle, lowerCasedContestTitle, videoTitle.includes(lowerCasedContestTitle))
 
         // check if contest title matches the video title or description
         // or contest link mentioned in the video description, it will be the case for codeforces
@@ -124,8 +124,8 @@ const mapWithYoutubePlaylist = async (platform: PlatformType, contestTitle: stri
 // This should be executed as a cron job, but for the time being we will use it in out script
 // Or we can expose and endpoint and hit it every 24hrs to update the playlist content in the database
 const populateDbWithVideos = async () => {
-    // await fetchPlaylist("CODEFORCES");
-    // await fetchPlaylist("CODECHEF");
+    await fetchPlaylist("CODEFORCES");
+    await fetchPlaylist("CODECHEF");
     await fetchPlaylist("LEETCODE");
 }
 

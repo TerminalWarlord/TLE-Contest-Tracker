@@ -2,7 +2,7 @@
 
 export const timeDifference = (date: Date): { hours: string, minutes: string, seconds: string } => {
     const now = new Date();
-    let diff = (date.getTime() - now.getTime()) / 1000;
+    let diff = Math.abs(date.getTime() - now.getTime()) / 1000;
 
     const hours = Math.floor(diff / 3600);
     diff %= 3600;

@@ -1,4 +1,4 @@
-import { Response } from "express";
+import { NextFunction, Response } from "express";
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../config";
 import { CustomRequest } from "../types/user";
@@ -11,7 +11,7 @@ export const getUnixTime = (datetime: string): number => {
 }
 
 
-export const getUserIdFromHeader = (req: CustomRequest, res: Response) => {
+export const getUserIdFromHeader = (req: CustomRequest, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization as string;
 
     // If no authorization header is set, return
@@ -38,5 +38,6 @@ export const getUserIdFromHeader = (req: CustomRequest, res: Response) => {
         });
         return;
     }
+    next();
 }
 

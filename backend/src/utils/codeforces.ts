@@ -48,8 +48,8 @@ const codeforces = async () => {
                     const url = "https://codeforces.com/contest/" + res.id;
                     
                     // Check if the contest has ended
-                    const currentTimeInUnix = Math.floor((Date.now() / 1000))
-                    const hasEnded = startsAt < currentTimeInUnix;
+                    // const currentTimeInUnix = Math.floor((Date.now() / 1000))
+                    // const hasEnded = startsAt < currentTimeInUnix;
 
                     // Get the appropiate yt url
                     const youtubeUrl = await mapWithYoutubePlaylist("CODEFORCES", title, url);
@@ -58,7 +58,7 @@ const codeforces = async () => {
                     // Store the new contests to the DB
                     await prismaClient.contest.create({
                         data: {
-                            hasEnded,
+                            // hasEnded,
                             duration,
                             startsAt,
                             title,

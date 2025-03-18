@@ -111,3 +111,22 @@ export const getContests = async (offset: number = 0, limit: number = 10, platfo
     // };
 }
 
+
+
+export const editContestYoutubeUrl = async (contestId: number, youtubeUrl: string) => {
+    try {
+        const { data } = await axios.post("http://localhost:3000/v1/contest/edit", {
+            contestId,
+            youtubeUrl
+        }, {
+            headers: {
+                "Authorization": "Bearer " + getToken()
+            }
+        });
+        
+        return data;
+    }
+    catch (err) {
+        throw Error("Failed to update contest");
+    }
+}  

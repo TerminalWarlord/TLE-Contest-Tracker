@@ -57,8 +57,8 @@ const codechef = async (offset: number = 0) => {
                     const duration = parseInt(res.contest_duration) * 60;
 
                     // Check if the contest has ended
-                    const currentTimeInUnix = Math.floor((Date.now() / 1000))
-                    const hasEnded = startsAt < currentTimeInUnix;
+                    // const currentTimeInUnix = Math.floor((Date.now() / 1000))
+                    // const hasEnded = startsAt < currentTimeInUnix;
 
                     // Get the appropiate yt url
                     // spliting the title at "(" because the pattern of CC is
@@ -71,7 +71,7 @@ const codechef = async (offset: number = 0) => {
                         data: {
                             title,
                             url,
-                            hasEnded,
+                            // hasEnded,
                             duration: duration,
                             startsAt: startsAt,
                             platform: "CODECHEF",

@@ -15,10 +15,11 @@ export interface Contest {
     hasEnded?: boolean;
     youtubeUrl?: string;
     url: string;
-    isBookmarked: boolean
+    isBookmarked: boolean;
+    isRunning?: boolean;
 }
 
-export type FilterType = "upcoming" | "past";
+export type FilterType = "upcoming" | "past" | "all";
 export type PlatformType = "CODEFORCES" | "CODECHEF" | "LEETCODE";
 
 

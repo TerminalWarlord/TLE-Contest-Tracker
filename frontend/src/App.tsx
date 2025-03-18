@@ -6,6 +6,8 @@ import Home from './pages/Home';
 import Authentication from './pages/Authentication';
 import Bookmark from './pages/Bookmarks';
 import { authLoader } from './lib/http/actions';
+import { UserContext } from './store/user-context';
+import { useState } from 'react';
 
 
 const queryClient = new QueryClient();
@@ -35,10 +37,30 @@ const routes = createBrowserRouter([
 ])
 
 function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState<string | null>(null);
+
+  const logOut = () => {
+    setIsAuthenticated(false);
+  }
+  const logIn = (role: string) => {
+    setIsAuthenticated(true);
+    setUser(role);
+  }
+
+  const ctxValue = {
+    isAuthenticated,
+    user,
+    logIn,
+    logOut
+  }
+
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-        <RouterProvider router={routes}></RouterProvider>
+        <UserContext.Provider value={ctxValue}>
+          <RouterProvider router={routes}></RouterProvider>
+        </UserContext.Provider>
       </ThemeProvider>
     </QueryClientProvider>
   )

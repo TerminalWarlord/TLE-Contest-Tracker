@@ -66,7 +66,7 @@ export const getToken = () => {
 
 
 
-export const getUserDetails = async () => {
+export const getUserDetails = async (updateRole: (role: string) => void) => {
     try {
         const { data } = await axios.get("http://localhost:3000/v1/me", {
             headers: {
@@ -74,6 +74,10 @@ export const getUserDetails = async () => {
             }
         });
         // throw Error("User not authenticated");
+        if (data) {
+            console.log(data)
+            updateRole((data as { role: string }).role);
+        }
         return data;
     }
     catch (err) {

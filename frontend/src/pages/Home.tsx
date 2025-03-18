@@ -11,7 +11,7 @@ const INITIAL_PLATFORMS: PlatformType[] = ["CODEFORCES", "CODECHEF", "LEETCODE"]
 
 
 const Home = () => {
-  const [currentFilter, setCurrentFilter] = useState<FilterType>("upcoming");
+  const [currentFilter, setCurrentFilter] = useState<FilterType>("all");
   const [selectedPlatforms, setSelectedPlatform] = useState<PlatformType[]>(INITIAL_PLATFORMS)
 
   function handleFilterChange(val: FilterType) {

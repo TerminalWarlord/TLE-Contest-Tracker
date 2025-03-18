@@ -1,6 +1,6 @@
 import ContestCard from "./ContestCard"
 import { useQuery } from "@tanstack/react-query";
-import { getContests } from "@/lib/http/getContests";
+import { getContests } from "@/lib/http/contests";
 import { CircleSlash2, Loader2 } from "lucide-react";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "./ui/pagination";
@@ -21,7 +21,7 @@ const Contests = () => {
     const [offset, setOffset] = useState(parseInt(searchParams.get("offset") || "0"));
     const filterCtx = useContext(FilterContext);
     const { data, error, isPending } = useQuery({
-        queryKey: [isBookmark?"bookmarked-contests":"contests", offset, 20, filterCtx.platforms, filterCtx.type],
+        queryKey: [isBookmark ? "bookmarked-contests" : "contests", offset, 20, filterCtx.platforms, filterCtx.type],
         queryFn: () => getContests(offset, 20, filterCtx.platforms, filterCtx.type, isBookmark),
         staleTime: 5 * 60 * 1000
     });

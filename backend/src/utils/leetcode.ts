@@ -102,8 +102,8 @@ const leetcode = async (page: number = 1) => {
                     const startsAt = res.startTime;
 
                     // Check if the contest has ended
-                    const currentTimeInUnix = Math.floor((Date.now() / 1000))
-                    const hasEnded = startsAt < currentTimeInUnix;
+                    // const currentTimeInUnix = Math.floor((Date.now() / 1000))
+                    // const hasEnded = startsAt < currentTimeInUnix;
 
                     // Get the appropiate yt url
                     const youtubeUrl = await mapWithYoutubePlaylist("LEETCODE", title, url);
@@ -114,7 +114,6 @@ const leetcode = async (page: number = 1) => {
                         data: {
                             url,
                             duration,
-                            hasEnded,
                             startsAt,
                             title,
                             platform: "LEETCODE",

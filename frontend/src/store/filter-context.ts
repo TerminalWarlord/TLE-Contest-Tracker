@@ -11,7 +11,7 @@ interface FilterContextType {
 
 
 export const FilterContext = createContext<FilterContextType>({
-    type: "upcoming",
+    type: "all",
     platforms: [],
     updatePlatform: () => { },
     updateFilterType: ()=> {},

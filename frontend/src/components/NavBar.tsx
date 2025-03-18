@@ -4,17 +4,19 @@ import { ModeToggle } from "./mode-toggle";
 import { useQuery } from "@tanstack/react-query";
 import { getUserDetails } from "@/lib/http/auth";
 import { Button } from "./ui/button";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { UserContext } from "@/store/user-context";
 
 const NavBar = () => {
     const navigate = useNavigate()
 
     const [isLoggedIn, setIsLoggedIn] = useState<boolean>(!!localStorage.getItem('token'));
     const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+    const userCtx = useContext(UserContext);
 
     const { data, refetch } = useQuery({
         queryKey: ["user"],
-        queryFn: getUserDetails,
+        queryFn: ()=>getUserDetails(userCtx.logIn),
         staleTime: 5 * 60 * 1000,
         enabled: isLoggedIn
     })
@@ -23,12 +25,17 @@ const NavBar = () => {
     const handleLogout = () => {
         localStorage.removeItem("token");
         setIsLoggedIn(false);
+        userCtx.logOut();
         navigate('/auth/login');
 
     }
 
     useEffect(() => {
         if (isLoggedIn) {
+            if(data){
+                console.log(data)
+                userCtx.logIn((data as { user: string }).user)
+            }
             refetch();
         }
     }, [isLoggedIn, refetch]);

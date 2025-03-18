@@ -1,5 +1,5 @@
 
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { prismaClient } from "../utils/db";
 import { PlatformType } from "../types/contest";
 import codeforces from "../utils/codeforces";
@@ -9,11 +9,11 @@ import { populateDbWithVideos } from "../utils/youtube";
 import { getUserIdFromHeader } from "../utils/helper";
 import { CustomRequest } from "../types/user";
 
-const getContests = async (req: CustomRequest, res: Response) => {
+export const getContests = async (req: CustomRequest, res: Response, next: NextFunction) => {
 
     try {
 
-        const { offset = "0", limit = "10", platforms = "", filterType = "upcoming", isBookmark = false } = req.query;
+        const { offset = "0", limit = "10", platforms = "", filterType = "all", isBookmark = false } = req.query;
 
         // Convert query parameters to correct types
         const parsedOffset = Math.max(parseInt(offset as string, 0), 0);
@@ -43,7 +43,7 @@ const getContests = async (req: CustomRequest, res: Response) => {
         // If the request is for user bookmarks, set the userId first using token in the headers
         // get the user from DB and set in on req 
         if (isBookmark) {
-            getUserIdFromHeader(req, res);
+            getUserIdFromHeader(req, res, next);
             whereClause.bookmark = {
                 some: {
                     userId: req.userId
@@ -57,11 +57,11 @@ const getContests = async (req: CustomRequest, res: Response) => {
         if (filterType === "past") {
             whereClause.startsAt = { lte: Date.now() / 1000 }
         }
-        else {
+        else if (filterType === "upcoming") {
             // Similarly filter the upcoming ones
             whereClause.startsAt = { gt: Date.now() / 1000 }
         }
-
+        console.log(whereClause)
         try {
             // Filter the results based on selected platforms, offset and limit
             // Taking limit+1 items to determine if there would be more items left after 
@@ -71,7 +71,7 @@ const getContests = async (req: CustomRequest, res: Response) => {
             const contests = await prismaClient.contest.findMany({
                 skip: parsedOffset,
                 orderBy: {
-                    startsAt: filterType === "past" ? "desc" : "asc",
+                    startsAt: (filterType === "past" || filterType === "all") ? "desc" : "asc",
                 },
                 take: parsedLimit + 1,
                 where: whereClause,
@@ -87,9 +87,20 @@ const getContests = async (req: CustomRequest, res: Response) => {
 
             // Mark the contest true if they are bookmarked, also remove the "bookmark" data
             const transformedContests = contests.map((contest) => {
-                const { bookmark, ...contestWithoutBookmark } = contest;
+                // TODO: Remove hasEnded logic from platforms
+                const { bookmark, hasEnded, ...contestWithoutBookmark } = contest;
+
+                // Current unix time
+                const currentTime = Date.now() / 1000;
+                const endsAt = contest.startsAt + contest.duration;
+                const updatedHasEnded = currentTime > endsAt;
+
+                // Check if its currently running
+                const isRunning = currentTime >= contest.startsAt && currentTime <= endsAt;
                 return {
                     ...contestWithoutBookmark,
+                    isRunning,
+                    hasEnded: updatedHasEnded,
                     isBookmarked: bookmark.length > 0
                 }
             });
@@ -124,5 +135,30 @@ const getContests = async (req: CustomRequest, res: Response) => {
 
 }
 
-
-export { getContests };
+export const editContestYoutubeUrl = async (req: CustomRequest, res: Response) => {
+    const { contestId, youtubeUrl } = req.body;
+    const user = await prismaClient.user.findFirst({ where: { id: req.userId } });
+    if (!user || user.role !== "ADMIN") {
+        res.status(403).json({
+            message: "You don't have permission to edit contest!"
+        });
+        return;
+    }
+    try {
+        await prismaClient.contest.update({
+            where: { id: contestId },
+            data: {
+                youtubeUrl
+            }
+        });
+        res.json({
+            message: "Successfully updated contest!"
+        })
+    }
+    catch (err) {
+        console.log(err);
+        res.status(500).json({
+            message: "Failed to update contest"
+        });
+    }
+}

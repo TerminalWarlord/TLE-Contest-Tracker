@@ -1,4 +1,4 @@
-import { ArrowDown01, ArrowUp01, FilterIcon, X } from "lucide-react"
+import { ArrowDown01, ArrowDownWideNarrow, ArrowUp01, FilterIcon, X } from "lucide-react"
 import { Button } from "./ui/button"
 import { useContext, useEffect, useState } from "react"
 import { FilterContext } from "@/store/filter-context";
@@ -12,8 +12,8 @@ const Filter = () => {
 
     // TODO: Fix platform buttons
     const [platforms, setPlatforms] = useState<PlatformType[]>(filterCtx.platforms);
-    
-    useEffect(()=>{
+
+    useEffect(() => {
         setPlatforms(filterCtx.platforms);
     }, [filterCtx]);
     console.log(filterCtx.type)
@@ -33,6 +33,13 @@ const Filter = () => {
                     <p>Filter</p>
                 </div>
                 <div className="flex space-x-2 transition-all ease-in-out duration-400">
+                    <Button
+                        className="rounded-xl transition-all ease-in-out duration-400"
+                        variant={`${filterCtx.type === "all" ? "default" : "outline"}`}
+                        onClick={() => filterCtx.updateFilterType('all')}
+                    >
+                        <ArrowDownWideNarrow /> All
+                    </Button>
                     <Button
                         className="rounded-xl transition-all ease-in-out duration-400"
                         variant={`${filterCtx.type === "upcoming" ? "default" : "outline"}`}
