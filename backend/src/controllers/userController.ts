@@ -1,56 +1,25 @@
-import { NextFunction, Request, Response } from "express";
-import jwt from "jsonwebtoken";
-import { JWT_SECRET } from "../config";
-import { prismaClient } from "../utils/db";
+import { NextFunction, Response } from "express";
 import { PlatformType } from "../types/contest";
 import { getUserIdFromHeader } from "../utils/helper";
+import { CustomRequest } from "../types/user";
+import { User } from "../models/userModel";
+import { Bookmark } from "../models/bookmark";
 
 
-interface CustomRequest extends Request {
-    userId?: number
-}
+
 
 const authWall = async (req: CustomRequest, res: Response, next: NextFunction) => {
-    // const authHeader = req.headers.authorization as string;
-
-    // // If no authorization header is set, return
-    // if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    //     res.status(403).json({
-    //         message: "Unauthorized"
-    //     });
-    //     return;
-    // }
-
-    // // Split and take the portion after "Bearer "
-    // const token = authHeader.split(" ")[1];
-
-
-    // // Now verify the token's validity
-    // try {
-    //     const decodedToken = jwt.verify(token, JWT_SECRET) as { userId: number };
-    //     req.userId = decodedToken.userId;
-    // }
-    // catch (err) {
-    //     // JWT throws error if the token is invalid
-    //     res.status(403).json({
-    //         message: "Invalid token!"
-    //     });
-    //     return;
-    // }
-    getUserIdFromHeader(req, res);
-    next();
+    if (getUserIdFromHeader(req, res)) {
+        next();
+    }
 }
 
 
 
 const bookmarkController = async (req: CustomRequest, res: Response) => {
     const userId = req.userId;
-    const { contestId }: { contestId: number } = req.body;
-    const user = await prismaClient.user.findFirst({
-        where: {
-            id: userId
-        }
-    });
+    const { contestId } = req.body;
+    const user = await User.findById(userId);
 
     if (!user || !userId) {
         res.status(403).json({
@@ -58,39 +27,34 @@ const bookmarkController = async (req: CustomRequest, res: Response) => {
         });
         return;
     }
-    try{
-        const bookmark = await prismaClient.bookmark.findFirst({
-            where: {
-                contestId: contestId,
-                userId: userId
-            }
+    try {
+        const bookmark = await Bookmark.findOne({
+            contestId,
+            userId
         })
         if (!bookmark) {
-            const newBookmark = await prismaClient.bookmark.create({
-                data: {
-                    contestId: contestId,
-                    userId: userId
-                }
+            const newBookmark = await Bookmark.create({
+                contestId,
+                userId
             });
             res.json({
                 message: "Successfully added contest to the bookmark!",
                 bookmark: newBookmark
             })
             return;
-        } 
+        }
         else {
-            await prismaClient.bookmark.delete({
-                where: {
-                    id: bookmark.id
-                }
+            await Bookmark.deleteOne({
+                contestId,
+                userId
             });
             res.json({
                 message: "Successfully removed bookmark!",
             })
         }
-    
+
     }
-    catch(err){
+    catch (err) {
         res.status(500).json({
             message: "Failed to make a database query!"
         })
@@ -99,68 +63,13 @@ const bookmarkController = async (req: CustomRequest, res: Response) => {
 
 }
 
-const getBookmarks = async (req: CustomRequest, res: Response) => {
-    const userId = req.userId;
-    const { offset = 0, limit = 10, platforms, filterType }:
-        { offset: number, limit: number, platforms: string, filterType: string } = req.body;
-
-
-    // Convert list of string to list of PlatformType
-    const typedPlatform = platforms.split(',').map(platform => platform as PlatformType);
-
-
-    const whereClause = {
-        platform: {
-            in: typedPlatform
-        },
-        startsAt: {}
-    };
-
-    // If filter filterType is set to past we filter out the contests
-    // using current time in Unix and taking contests that started less than 
-    // that value
-    if (filterType === "past") {
-        whereClause.startsAt = { lte: Date.now() / 1000 }
-    }
-    else {
-        // Similarly filter the upcoming ones
-        whereClause.startsAt = { gt: Date.now() / 1000 }
-    }
-
-    try {
-        const bookmarks = await prismaClient.bookmark.findMany({
-            where: {
-                userId: userId,
-                contest: whereClause
-            }
-        });
-        res.json({
-            message: "successful",
-            bookmarks
-        })
-    }
-    catch (err) {
-        res.status(500).json({
-            message: "Something went wrong!"
-        })
-    }
-
-}
 
 
 const getMe = async (req: CustomRequest, res: Response) => {
     const userId = req.userId;
 
     try {
-        const user = await prismaClient.user.findFirst({
-            where: { id: userId },
-            select: {
-                id: true,
-                email: true,
-                name: true,
-                role: true,
-            }
-        });
+        const user = await User.findById(userId).select('_id email name role').lean();
 
         res.json({
             ...user
@@ -177,6 +86,5 @@ const getMe = async (req: CustomRequest, res: Response) => {
 export {
     authWall,
     bookmarkController,
-    getBookmarks,
     getMe,
 }

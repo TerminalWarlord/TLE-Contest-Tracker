@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const LEETCODE_PLAYLIST_ID = 'PLcXpkI9A-RZI6FhydNz3JBt_-p_i25Cbr';
 const CODECHEF_PLAYLIST_ID = 'PLcXpkI9A-RZIZ6lsE0KCcLWeKNoG45fYr';
 const CODEFORCES_PLAYLIST_ID = 'PLcXpkI9A-RZLUfBSNp-YQBCOezZKbDSgB';

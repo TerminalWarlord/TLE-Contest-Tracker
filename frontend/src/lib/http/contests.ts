@@ -43,7 +43,7 @@ export const getContests = async (offset: number = 0, limit: number = 10, platfo
 
 
 
-export const editContestYoutubeUrl = async (contestId: number, youtubeUrl: string) => {
+export const editContestYoutubeUrl = async (contestId: string, youtubeUrl: string) => {
     try {
         const { data } = await axios.post(API_URL + "/v1/contest/edit", {
             contestId,

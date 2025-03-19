@@ -40,7 +40,7 @@ const ContestCard = ({ contest }: { contest: Contest }) => {
 
     // Update bookmark and UI (handle success and fallback)
     const { mutate } = useMutation({
-        mutationFn: async (contestId: number) => updateBookmark(contestId),
+        mutationFn: async (contestId: string) => updateBookmark(contestId),
         onMutate: async () => {
             setIsBookmarked(prev => !prev);
         },
@@ -54,7 +54,7 @@ const ContestCard = ({ contest }: { contest: Contest }) => {
 
 
     const { mutate: mutateOnContestEdit } = useMutation({
-        mutationFn: async ({ contestId, youtubeUrl }: { contestId: number, youtubeUrl: string }) => await editContestYoutubeUrl(contestId, youtubeUrl),
+        mutationFn: async ({ contestId, youtubeUrl }: { contestId: string, youtubeUrl: string }) => await editContestYoutubeUrl(contestId, youtubeUrl),
         onSettled: async () => {
             queryClient.invalidateQueries({ queryKey: ["bookmarked-contests", offset, 20, filterCtx.platforms, filterCtx.type] })
         }
@@ -86,7 +86,7 @@ const ContestCard = ({ contest }: { contest: Contest }) => {
     const hasEnded = contest.hasEnded;
 
 
-    const handleBookmarkUpdate = async (contestId: number) => {
+    const handleBookmarkUpdate = async (contestId: string) => {
         mutate(contestId);
     }
 
@@ -96,7 +96,7 @@ const ContestCard = ({ contest }: { contest: Contest }) => {
 
     const handleModal = async () => {
         if (modalOpen) {
-            await mutateOnContestEdit({ youtubeUrl, contestId: contest.id });
+            await mutateOnContestEdit({ youtubeUrl, contestId: contest._id });
         }
         setModalOpen(!modalOpen);
     };
@@ -161,7 +161,7 @@ const ContestCard = ({ contest }: { contest: Contest }) => {
 
                     <div className="w-[25px] h-[25px] flex justify-center items-center">
                         <Bookmark size={18}
-                            onClick={() => handleBookmarkUpdate(contest.id)}
+                            onClick={() => handleBookmarkUpdate(contest._id)}
                             className={`hover:w-[20px] h-[20px]
                          transition-all duration-300 ease-in-out  ${isBookmarked ? 'fill-blue-400  text-blue-400 hover:text-blue-400 dark:fill-blue-300 dark:text-blue-300  hover:dark:text-blue-300' : 'fill-transparent hover:text-black hover:dark:text-white'}`}
                         />

@@ -2,7 +2,7 @@ import axios from "axios";
 import { getToken } from "./auth";
 
 const API_URL = import.meta.env.VITE_API_URL;
-export const updateBookmark = async (contestId: number) => {
+export const updateBookmark = async (contestId: string) => {
     try {
         const { data } = await axios.post(API_URL + '/v1/bookmark', {
             contestId

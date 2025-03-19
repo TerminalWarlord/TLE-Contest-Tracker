@@ -7,7 +7,7 @@ export enum Platform {
 };
 
 export interface Contest {
-    id: number;
+    _id: string;
     platform: Platform;
     startsAt: number;
     duration: number;

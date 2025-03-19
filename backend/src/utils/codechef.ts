@@ -1,4 +1,4 @@
-import { prismaClient } from "./db";
+import { Contest } from "../models/contestModel";
 import { getUnixTime } from "./helper";
 import { mapWithYoutubePlaylist } from "./youtube";
 
@@ -23,18 +23,14 @@ const codechef = async (offset: number = 0) => {
         }
 
         // get the exisiting CC contests that are already in the DB
-        const existingContest = await prismaClient.contest.findMany({
-            where: {
-                platform: "CODECHEF"
-            },
-            select: {
-                url: true
-            }
-        });
+        const existingContests = await Contest.find({
+            platform: "CODECHEF",
+            youtubeUrl: { $exists: true, $ne: "" }
+        }).select("url");
 
 
         // create a list of string from list of obj
-        const existingUrls = existingContest.map(contest => contest.url);
+        const existingUrls = existingContests.map(contest => contest.url);
 
 
         // Populate the DB
@@ -67,16 +63,13 @@ const codechef = async (offset: number = 0) => {
 
 
                     // Store the new contests to the DB
-                    await prismaClient.contest.create({
-                        data: {
-                            title,
-                            url,
-                            // hasEnded,
-                            duration: duration,
-                            startsAt: startsAt,
-                            platform: "CODECHEF",
-                            youtubeUrl: youtubeUrl?.id
-                        }
+                    await Contest.create({
+                        title,
+                        url,
+                        duration: duration,
+                        startsAt: startsAt,
+                        platform: "CODECHEF",
+                        youtubeUrl: youtubeUrl?.fullUrl
                     });
                 }
                 catch (err) {

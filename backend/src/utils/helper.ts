@@ -28,15 +28,16 @@ export const getUserIdFromHeader = (req: CustomRequest, res: Response) => {
 
     // Now verify the token's validity
     try {
-        const decodedToken = jwt.verify(token, JWT_SECRET) as { userId: number };
+        const decodedToken = jwt.verify(token, JWT_SECRET) as { userId: string };
         req.userId = decodedToken.userId;
+        return true
     }
     catch (err) {
         // JWT throws error if the token is invalid
         res.status(403).json({
             message: "Invalid token!"
         });
-        return;
+        return false;
     }
 }
 

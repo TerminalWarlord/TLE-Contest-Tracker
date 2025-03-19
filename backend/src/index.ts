@@ -5,6 +5,9 @@ import { bookmarkRoutes } from "./routes/bookmark";
 import { userRoutes } from "./routes/user";
 import cors from "cors";
 import { rateLimit } from "express-rate-limit";
+import { connectDb } from "./utils/db";
+require('dotenv').config();
+
 
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
@@ -14,7 +17,7 @@ const limiter = rateLimit({
 })
 
 
-
+connectDb();
 
 const app = express();
 app.use(express.json());
@@ -32,6 +35,9 @@ app.use("/v1", contestRoutes);
 app.use("/v1", authRoutes);
 app.use("/v1", userRoutes);
 app.use("/v1", bookmarkRoutes);
+
+
+
 
 
 

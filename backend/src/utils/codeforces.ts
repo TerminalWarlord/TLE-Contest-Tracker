@@ -1,4 +1,5 @@
-import { prismaClient } from "./db";
+import { Contest } from "../models/contestModel";
+import { Video } from "../models/videoModel";
 import { mapWithYoutubePlaylist } from "./youtube";
 
 const codeforces = async () => {
@@ -16,18 +17,13 @@ const codeforces = async () => {
 
 
         // get the exisiting CF contests that are already in the DB
-        const existingContest = await prismaClient.contest.findMany({
-            where: {
-                platform: "CODEFORCES"
-            },
-            select: {
-                url: true
-            }
-        });
-
+        const existingContests = await Contest.find({
+            platform: "CODEFORCES",
+            youtubeUrl: { $exists: true, $ne: "" }
+        }).select("url");
 
         // create a list of string from list of obj
-        const existingUrls = existingContest.map(contest => contest.url);
+        const existingUrls = existingContests.map(contest => contest.url);
 
 
         // Populate the DB
@@ -40,38 +36,45 @@ const codeforces = async () => {
             .map(async (res: any) => {
                 try {
 
-                    
                     // Basic contest data
                     const title = res.name;
                     const startsAt = res.startTimeSeconds;
                     const duration = res.durationSeconds;
                     const url = "https://codeforces.com/contest/" + res.id;
-                    
+                    // console.log(title)
+
                     // Check if the contest has ended
                     // const currentTimeInUnix = Math.floor((Date.now() / 1000))
                     // const hasEnded = startsAt < currentTimeInUnix;
 
                     // Get the appropiate yt url
-                    const youtubeUrl = await mapWithYoutubePlaylist("CODEFORCES", title, url);
-
+                    // console.log("Searching for match")
+                    let youtubeUrl;
+                    try {
+                        youtubeUrl = await mapWithYoutubePlaylist("CODEFORCES", title, url);
+                    }
+                    catch (err) {
+                        console.log(err);
+                    }
+                    console.log("Searched match", youtubeUrl)
 
                     // Store the new contests to the DB
-                    await prismaClient.contest.create({
-                        data: {
-                            // hasEnded,
-                            duration,
-                            startsAt,
-                            title,
-                            url,
-                            platform: "CODEFORCES",
-                            youtubeUrl: youtubeUrl?.id
-                        }
+                    await Contest.create({
+                        duration,
+                        startsAt,
+                        title,
+                        url,
+                        platform: "CODEFORCES",
+                        youtubeUrl: youtubeUrl?.fullUrl
                     });
+                    console.log("added")
                 }
                 catch (err) {
                     console.log(err);
                 }
             }));
+        console.log("Total results fetched:", results.length);
+        console.log("Filtered results:", results.filter((res: any) => !existingUrls.includes("https://codeforces.com/contest/" + res.id)).length);
     }
     catch (err) {
         console.log(err)

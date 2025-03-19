@@ -1,3 +1,4 @@
+import { Types } from "mongoose";
 
 
 export enum Platform {
@@ -6,16 +7,24 @@ export enum Platform {
     CODECHEF = "CODECHEF"
 };
 
-export interface Contest {
-    id: number;
+export interface ContestType {
+    title: String;
+    url: String;
+    youtubeUrl: String;
     platform: Platform;
-    startsAt: Date;
+    startsAt: number;
     duration: number;
     contestTitle: string;
-    hasEnded?: boolean; 
+    hasEnded?: boolean;
     isBookmarked: boolean;
     isRunning?: boolean;
 }
 
 export type FilterType = "upcoming" | "past" | "all";
 export type PlatformType = "CODEFORCES" | "CODECHEF" | "LEETCODE";
+
+
+export interface MongooseFilter {
+    platform?: Object | null;
+    startsAt?: Object | null;
+}

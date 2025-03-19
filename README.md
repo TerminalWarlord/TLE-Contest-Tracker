@@ -15,10 +15,9 @@ A web application to track programming contests from platforms like **Codeforces
 ## **Tech Stack**
 
 - **Frontend**: React.js, Tailwind CSS, React Router, Tanstack Query
-- **Backend**: Node.js, Express.js, Prisma (MongoDB), Zod
+- **Backend**: Node.js, Express.js, Mongoose (MongoDB), Zod
 - **APIs**: Codeforces API, CodeChef API, LeetCode GraphQL API
 
-Just for the record, any prisma supported database can be used to run the application
 
 ---
 
@@ -65,7 +64,7 @@ and similarly create a `.env` file in the frontend/ directory with `VITE_API_URL
 4. Generate the Prisma Client
 ```bash
 cd backend
-npx prisma migrate dev
+npx prisma db push
 npx prisma generate
 ```
 

@@ -1,9 +1,11 @@
-
 import { NextFunction, Response } from "express";
-import { prismaClient } from "../utils/db";
-import { PlatformType } from "../types/contest";
+import { ContestType, MongooseFilter, PlatformType } from "../types/contest";
 import { getUserIdFromHeader } from "../utils/helper";
 import { CustomRequest } from "../types/user";
+import { Contest } from "../models/contestModel";
+import { User } from "../models/userModel";
+import { Bookmark } from "../models/bookmark";
+import mongoose from "mongoose";
 
 export const getContests = async (req: CustomRequest, res: Response, next: NextFunction) => {
 
@@ -22,24 +24,16 @@ export const getContests = async (req: CustomRequest, res: Response, next: NextF
 
 
 
-        const whereClause = {
-            platform: {
-                in: typedPlatform
-            },
-            startsAt: {},
-            bookmark: {}
+        const filters: MongooseFilter = {
+            platform: { $in: typedPlatform },
+            startsAt: { $exists: true }
         };
 
         // If the request is for user bookmarks, set the userId first using token in the headers
         // get the user from DB and set in on req 
         if (isBookmark) {
-            getUserIdFromHeader(req, res);
-            if (req.userId) {
-                whereClause.bookmark = {
-                    some: {
-                        userId: req.userId
-                    }
-                }
+            if (!getUserIdFromHeader(req, res)) {
+                return;
             }
         }
 
@@ -47,11 +41,11 @@ export const getContests = async (req: CustomRequest, res: Response, next: NextF
         // using current time in Unix and taking contests that started less than 
         // that value
         if (filterType === "past") {
-            whereClause.startsAt = { lte: Date.now() / 1000 }
+            filters.startsAt = { $lt: Math.floor(Date.now() / 1000) }
         }
         else if (filterType === "upcoming") {
             // Similarly filter the upcoming ones
-            whereClause.startsAt = { gt: Date.now() / 1000 }
+            filters.startsAt = { $gt: Math.floor(Date.now() / 1000) }
         }
         // console.log(whereClause)
 
@@ -67,64 +61,62 @@ export const getContests = async (req: CustomRequest, res: Response, next: NextF
 
             let transformedContests: any[] = [];
 
-            // Intentionally making it redundant
-            // Will clean it up later
             if (req.userId) {
-                const contests = await prismaClient.contest.findMany({
-                    skip: parsedOffset,
-                    orderBy: {
-                        startsAt: (filterType === "past" || filterType === "all") ? "desc" : "asc",
-                    },
-                    take: parsedLimit + 1,
-                    where: whereClause,
-                    include: {
-                        bookmark: {
-                            where: {
-                                userId: req.userId
-                            },
-                            select: { id: true },
-                        }
-                    }
-
+                const contests = await Bookmark.find({
+                    userId: new mongoose.Types.ObjectId(req.userId)
                 })
+                    .populate({
+                        path: "contestId",
+                        match: filters
+                    })
+                    .skip(parsedOffset)
+                    .limit(parsedLimit + 1)
+                    .lean();
+
+                // Extract only the contest objects
+                const contestList = contests
+                    .map(bookmark => bookmark.contestId)
+
+
+
 
                 // Mark the contest true if they are bookmarked, also remove the "bookmark" data
-                transformedContests = contests.map((contest) => {
-                    // TODO: Remove hasEnded logic from platforms
-                    const { bookmark, hasEnded, ...contestWithoutBookmark } = contest;
-
-
+                transformedContests = (contestList as unknown as ContestType[]).map(contest => {
 
                     // Current unix time
                     const currentTime = Date.now() / 1000;
                     const endsAt = contest.startsAt + contest.duration;
                     const updatedHasEnded = currentTime > endsAt;
 
+                    // Yonked this idea from codeforces, best way to sort contests
+                    // sort them based on the time difference from now in ascending order
+                    const relativeTime = currentTime - contest.startsAt;
+
                     // Check if its currently running
                     const isRunning = currentTime >= contest.startsAt && currentTime <= endsAt;
                     return {
-                        ...contestWithoutBookmark,
+                        ...contest,
+                        relativeTime,
                         isRunning,
                         hasEnded: updatedHasEnded,
-                        isBookmarked: bookmark.length > 0
+                        isBookmarked: true
                     }
-                });
+                }).sort((a, b) => a.relativeTime - b.relativeTime);
+
+
             }
             else {
-                const contests = await prismaClient.contest.findMany({
-                    skip: parsedOffset,
-                    orderBy: {
-                        startsAt: (filterType === "past" || filterType === "all") ? "desc" : "asc",
-                    },
-                    take: parsedLimit + 1,
-                    where: whereClause,
-                })
+                const contests = await Contest.find({ ...filters })
+                    .sort({
+                        startsAt: (filterType === "all"
+                            || filterType === "past") ? "desc" : 'asc'
+                    })
+                    .skip(parsedOffset)
+                    .limit(parsedLimit)
+                    .lean();
 
                 // Mark the contest true if they are bookmarked, also remove the "bookmark" data
                 transformedContests = contests.map((contest) => {
-                    const { hasEnded, ...contestWithoutBookmark } = contest;
-
-
 
                     // Current unix time
                     const currentTime = Date.now() / 1000;
@@ -133,13 +125,18 @@ export const getContests = async (req: CustomRequest, res: Response, next: NextF
 
                     // Check if its currently running
                     const isRunning = currentTime >= contest.startsAt && currentTime <= endsAt;
+
+                    // Yonked this idea from codeforces, best way to sort contests
+                    // sort them based on the time difference from now in ascending order
+                    const relativeTime = currentTime - contest.startsAt;
                     return {
-                        ...contestWithoutBookmark,
+                        ...contest,
                         isRunning,
+                        relativeTime,
                         hasEnded: updatedHasEnded,
                         isBookmarked: false
                     }
-                });
+                }).sort((a, b) => a.relativeTime - b.relativeTime);
             }
 
 
@@ -175,7 +172,7 @@ export const getContests = async (req: CustomRequest, res: Response, next: NextF
 
 export const editContestYoutubeUrl = async (req: CustomRequest, res: Response) => {
     const { contestId, youtubeUrl } = req.body;
-    const user = await prismaClient.user.findFirst({ where: { id: req.userId } });
+    const user = await User.findById(req.userId);
     if (!user || user.role !== "ADMIN") {
         res.status(403).json({
             message: "You don't have permission to edit contest!"
@@ -183,12 +180,10 @@ export const editContestYoutubeUrl = async (req: CustomRequest, res: Response) =
         return;
     }
     try {
-        await prismaClient.contest.update({
-            where: { id: contestId },
-            data: {
-                youtubeUrl
-            }
-        });
+        await Contest.updateOne(
+            { _id: contestId },
+            { $set: { youtubeUrl } }
+        );
         res.json({
             message: "Successfully updated contest!"
         })

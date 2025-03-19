@@ -1,4 +1,4 @@
-import { prismaClient } from "./db";
+import { Contest } from "../models/contestModel";
 import { mapWithYoutubePlaylist } from "./youtube";
 
 
@@ -71,19 +71,14 @@ const leetcode = async (page: number = 1) => {
         const upcomingContests = await twoTopContests();
         results.push(...upcomingContests);
 
-        // get the exisiting CC contests that are already in the DB
-        const existingContest = await prismaClient.contest.findMany({
-            where: {
-                platform: "LEETCODE"
-            },
-            select: {
-                url: true
-            }
-        });
-
-
+        // get the exisiting LC contests that are already in the DB
+        const existingContests = await Contest.find({
+            platform: "LEETCODE",
+            youtubeUrl: { $exists: true, $ne: "" }
+        }).select("url");
+        
         // create a list of string from list of obj
-        const existingUrls = existingContest.map(contest => contest.url);
+        const existingUrls = existingContests.map(contest => contest.url);
 
 
         // Populate the DB
@@ -110,15 +105,13 @@ const leetcode = async (page: number = 1) => {
 
 
                     // Store the new contests to the DB
-                    await prismaClient.contest.create({
-                        data: {
-                            url,
-                            duration,
-                            startsAt,
-                            title,
-                            platform: "LEETCODE",
-                            youtubeUrl: youtubeUrl?.id
-                        }
+                    await Contest.create({
+                        url,
+                        duration,
+                        startsAt,
+                        title,
+                        platform: "LEETCODE",
+                        youtubeUrl: youtubeUrl?.fullUrl
                     });
                 }
                 catch (err) {

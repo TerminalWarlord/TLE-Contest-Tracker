@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { z } from "zod";
-import { prismaClient } from "../utils/db";
+import { User } from "../models/userModel";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../config";
@@ -8,7 +8,7 @@ import { JWT_SECRET } from "../config";
 
 
 
-const signUpController = async (req: Request, res: Response) => {
+export const signUpController = async (req: Request, res: Response) => {
     // Intentionally making "name" mandatory here
     const userSchema = z.object({
         email: z.string().email("Must be a valid email!"),
@@ -24,9 +24,9 @@ const signUpController = async (req: Request, res: Response) => {
         try {
 
             // Check if the user already exists with the same email
-            const user = await prismaClient.user.findFirst({
-                where: { email: parsedUser.data.email }
-            });
+            const user = await User.findOne({
+                email: parsedUser.data.email
+            })
 
             // If user exist, show error and return
             if (user) {
@@ -42,13 +42,11 @@ const signUpController = async (req: Request, res: Response) => {
 
 
             // Store user data in the DB
-            await prismaClient.user.create({
-                data: {
-                    email: parsedUser.data.email,
-                    name: parsedUser.data.name,
-                    password: hashedPassword
-                }
-            });
+            await User.create({
+                email: parsedUser.data.email,
+                name: parsedUser.data.name,
+                password: hashedPassword,
+            })
 
             res.json({
                 message: "You have successfully signed up"
@@ -69,7 +67,7 @@ const signUpController = async (req: Request, res: Response) => {
 }
 
 
-const signInController = async (req: Request, res: Response) => {
+export const signInController = async (req: Request, res: Response) => {
 
     // Create Validation Schema
     const userSchema = z.object({
@@ -84,8 +82,9 @@ const signInController = async (req: Request, res: Response) => {
 
         try {
             // check if the user actually exists
-            const user = await prismaClient.user.findFirst({
-                where: { email: parsedUser.data.email }
+
+            const user = await User.findOne({
+                email: parsedUser.data.email
             });
 
             // User doesnt exist in our DB
@@ -97,7 +96,7 @@ const signInController = async (req: Request, res: Response) => {
             }
 
             // compare the hashed password
-            const doesPasswordMatch = bcrypt.compare(parsedUser.data.password, user.password);
+            const doesPasswordMatch = bcrypt.compare(parsedUser.data.password, user.password as string);
 
             if (!doesPasswordMatch) {
                 res.status(403).json({
@@ -109,7 +108,9 @@ const signInController = async (req: Request, res: Response) => {
             // Generate JWT token and use userId as payload
             const token = jwt.sign({
                 userId: user.id
-            }, JWT_SECRET);
+            }, JWT_SECRET, {
+                expiresIn: "30d"
+            });
 
 
             // return the JWT token
@@ -119,6 +120,7 @@ const signInController = async (req: Request, res: Response) => {
             });
         }
         catch (err) {
+            console.log(err);
             res.status(500).json({
                 message: "Something went wrong!"
             });
@@ -132,8 +134,3 @@ const signInController = async (req: Request, res: Response) => {
     }
 }
 
-
-export {
-    signUpController,
-    signInController
-}
