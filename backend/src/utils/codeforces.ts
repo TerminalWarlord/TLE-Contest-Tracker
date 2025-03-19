@@ -56,18 +56,20 @@ const codeforces = async () => {
                     catch (err) {
                         console.log(err);
                     }
-                    console.log("Searched match", youtubeUrl)
-
-                    // Store the new contests to the DB
-                    await Contest.create({
-                        duration,
-                        startsAt,
-                        title,
-                        url,
-                        platform: "CODEFORCES",
-                        youtubeUrl: youtubeUrl?.fullUrl
-                    });
-                    console.log("added")
+                    try {
+                        // Store the new contests to the DB
+                        await Contest.create({
+                            duration,
+                            startsAt,
+                            title,
+                            url,
+                            platform: "CODEFORCES",
+                            youtubeUrl: youtubeUrl?.fullUrl
+                        });
+                    }
+                    catch (err) {
+                        console.log(url, "has already been added");
+                    }
                 }
                 catch (err) {
                     console.log(err);

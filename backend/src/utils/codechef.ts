@@ -61,16 +61,20 @@ const codechef = async (offset: number = 0) => {
                     // Starters 1xx (Rated till X stars)
                     const youtubeUrl = await mapWithYoutubePlaylist("CODECHEF", title.split('(')[0], url);
 
-
-                    // Store the new contests to the DB
-                    await Contest.create({
-                        title,
-                        url,
-                        duration: duration,
-                        startsAt: startsAt,
-                        platform: "CODECHEF",
-                        youtubeUrl: youtubeUrl?.fullUrl
-                    });
+                    try{
+                        // Store the new contests to the DB
+                        await Contest.create({
+                            title,
+                            url,
+                            duration: duration,
+                            startsAt: startsAt,
+                            platform: "CODECHEF",
+                            youtubeUrl: youtubeUrl?.fullUrl
+                        });
+                    }
+                    catch(err){
+                        console.log(url, "has already been added");
+                    }
                 }
                 catch (err) {
                     console.log(err);

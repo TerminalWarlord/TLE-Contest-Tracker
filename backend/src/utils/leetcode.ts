@@ -68,8 +68,10 @@ const leetcode = async (page: number = 1) => {
 
         // results array dont contain upcoming contests, so we have fetch
         // them separately and merge them with results
-        const upcomingContests = await twoTopContests();
-        results.push(...upcomingContests);
+        if(page===1){
+            const upcomingContests = await twoTopContests();
+            results.push(...upcomingContests);
+        }
 
         // get the exisiting LC contests that are already in the DB
         const existingContests = await Contest.find({
@@ -103,16 +105,22 @@ const leetcode = async (page: number = 1) => {
                     // Get the appropiate yt url
                     const youtubeUrl = await mapWithYoutubePlaylist("LEETCODE", title, url);
 
-
-                    // Store the new contests to the DB
-                    await Contest.create({
-                        url,
-                        duration,
-                        startsAt,
-                        title,
-                        platform: "LEETCODE",
-                        youtubeUrl: youtubeUrl?.fullUrl
-                    });
+                    try{
+                        // Store the new contests to the DB
+                        await Contest.create({
+                            url,
+                            duration,
+                            startsAt,
+                            title,
+                            platform: "LEETCODE",
+                            youtubeUrl: youtubeUrl?.fullUrl
+                        });
+                    }
+                    catch (err) {
+                        console.log(url, "has already been added");
+                    }
+                    
+                    
                 }
                 catch (err) {
                     console.log(res);

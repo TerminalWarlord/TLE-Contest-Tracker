@@ -7,10 +7,12 @@ import { User } from "../models/userModel";
 import { Bookmark } from "../models/bookmark";
 import mongoose from "mongoose";
 
+
+
+
 export const getContests = async (req: CustomRequest, res: Response, next: NextFunction) => {
 
     try {
-
         const { offset = "0", limit = "10", platforms = "", filterType = "all", isBookmark = false } = req.query;
 
         // Convert query parameters to correct types
@@ -76,32 +78,39 @@ export const getContests = async (req: CustomRequest, res: Response, next: NextF
                 // Extract only the contest objects
                 const contestList = contests
                     .map(bookmark => bookmark.contestId)
-
+                    .filter(contest => contest !== null && contest !== undefined);
 
 
 
                 // Mark the contest true if they are bookmarked, also remove the "bookmark" data
-                transformedContests = (contestList as unknown as ContestType[]).map(contest => {
+                transformedContests = (contestList as unknown as ContestType[])
+                    .map(contest => {
 
-                    // Current unix time
-                    const currentTime = Date.now() / 1000;
-                    const endsAt = contest.startsAt + contest.duration;
-                    const updatedHasEnded = currentTime > endsAt;
+                        // Current unix time
+                        const currentTime = Date.now() / 1000;
+                        const endsAt = contest.startsAt + contest.duration;
+                        const updatedHasEnded = currentTime > endsAt;
 
-                    // Yonked this idea from codeforces, best way to sort contests
-                    // sort them based on the time difference from now in ascending order
-                    const relativeTime = currentTime - contest.startsAt;
+                        // Yonked this idea from codeforces, best way to sort contests
+                        // sort them based on the time difference from now in ascending order
+                        const relativeTime = currentTime - contest.startsAt;
 
-                    // Check if its currently running
-                    const isRunning = currentTime >= contest.startsAt && currentTime <= endsAt;
-                    return {
-                        ...contest,
-                        relativeTime,
-                        isRunning,
-                        hasEnded: updatedHasEnded,
-                        isBookmarked: true
-                    }
-                }).sort((a, b) => a.relativeTime - b.relativeTime);
+                        // Check if its currently running
+                        const isRunning = currentTime >= contest.startsAt && currentTime <= endsAt;
+                        return {
+                            ...contest,
+                            relativeTime,
+                            isRunning,
+                            hasEnded: updatedHasEnded,
+                            isBookmarked: true
+                        }
+                    }).sort((a, b) => {
+                        if (filterType === "upcoming") {
+                            return b.relativeTime - a.relativeTime;
+                        } else {
+                            return a.relativeTime - b.relativeTime;
+                        }
+                    });
 
 
             }
@@ -112,7 +121,7 @@ export const getContests = async (req: CustomRequest, res: Response, next: NextF
                             || filterType === "past") ? "desc" : 'asc'
                     })
                     .skip(parsedOffset)
-                    .limit(parsedLimit)
+                    .limit(parsedLimit+1)
                     .lean();
 
                 // Mark the contest true if they are bookmarked, also remove the "bookmark" data
@@ -136,7 +145,13 @@ export const getContests = async (req: CustomRequest, res: Response, next: NextF
                         hasEnded: updatedHasEnded,
                         isBookmarked: false
                     }
-                }).sort((a, b) => a.relativeTime - b.relativeTime);
+                }).sort((a, b) => {
+                    if (filterType === "upcoming") {
+                        return b.relativeTime - a.relativeTime;
+                    } else {
+                        return a.relativeTime - b.relativeTime;
+                    }
+                });
             }
 
 

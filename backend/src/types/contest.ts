@@ -1,6 +1,3 @@
-import { Types } from "mongoose";
-
-
 export enum Platform {
     CODEFORCES = "CODEFORCES",
     LEETCODE = "LEETCODE",

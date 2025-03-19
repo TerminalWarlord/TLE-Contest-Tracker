@@ -31,7 +31,15 @@ A web application to track programming contests from platforms like **Codeforces
 4. The better approach would be **Semantic Search using vector embeddings**, but for the time being I've used simple string matching
 
 5. Now, to populate the database periodically we can run a cronjob or simple use https://betterstack.com make a request every 2-30 minutes (on free plan).
+---
 
+## Demo
+
+### Basic Frontend Functionalities
+[![Watch the video](https://img.youtube.com/vi/PjjFXlFiu6U/0.jpg)](https://youtu.be/PjjFXlFiu6U?si=dV5ECfdMYYE0K_ej)
+
+### Automatic Contest Update and Video Mapping
+[![Watch the video](https://img.youtube.com/vi/TTwHTDIk2mo/0.jpg)](https://youtu.be/TTwHTDIk2mo?si=dV5ECfdMYYE0K_ej)
 
 ---
 
@@ -61,14 +69,8 @@ Create a `.env` file in the backend/ directory with `DATABASE_URL`, `YOUTUBE_API
 
 and similarly create a `.env` file in the frontend/ directory with `VITE_API_URL`, link to backend app.
 
-4. Generate the Prisma Client
-```bash
-cd backend
-npx prisma db push
-npx prisma generate
-```
 
-5. Run the Application
+4. Run the Application
 
 Frontend:
 ```bash

@@ -41,9 +41,12 @@ function App() {
   const [user, setUser] = useState<string | null>(null);
 
   const logOut = () => {
+    queryClient.removeQueries();
     setIsAuthenticated(false);
+    setUser(null);
   }
   const logIn = (role: string) => {
+    queryClient.removeQueries();
     setIsAuthenticated(true);
     setUser(role);
   }

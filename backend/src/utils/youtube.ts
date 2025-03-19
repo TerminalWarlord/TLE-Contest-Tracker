@@ -104,7 +104,6 @@ const mapWithYoutubePlaylist = async (platform: PlatformType, contestTitle: stri
     try {
         const videos = await Video.find({ platform });
 
-        console.log("videos", videos.length)
         const video = videos.find(vid => {
             const videoTitle = vid.title.toLocaleLowerCase();
             const videoDesc = (vid.description || "").toLocaleLowerCase();

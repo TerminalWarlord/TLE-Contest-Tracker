@@ -37,6 +37,9 @@ const ContestCard = ({ contest }: { contest: Contest }) => {
     const [remainingTime, setRemainingTime] = useState<RemainingTime>({ hours: "00", minutes: "00", seconds: "00" });
     const formattedDuration = formatTime(contest.duration);
 
+    
+
+    console.log(userCtx.isAuthenticated, userCtx.user, contest.hasEnded)
 
     // Update bookmark and UI (handle success and fallback)
     const { mutate } = useMutation({
@@ -77,7 +80,7 @@ const ContestCard = ({ contest }: { contest: Contest }) => {
         }, 1000);
 
         return () => clearInterval(timer);
-    }, []);
+    }, [filterCtx.platforms, filterCtx.type]);
 
 
 
@@ -96,7 +99,7 @@ const ContestCard = ({ contest }: { contest: Contest }) => {
 
     const handleModal = async () => {
         if (modalOpen) {
-            await mutateOnContestEdit({ youtubeUrl, contestId: contest._id });
+            mutateOnContestEdit({ youtubeUrl, contestId: contest._id });
         }
         setModalOpen(!modalOpen);
     };
@@ -167,7 +170,7 @@ const ContestCard = ({ contest }: { contest: Contest }) => {
                         />
                     </div>
 
-                    <div className="w-[25px] h-[25px] flex justify-center items-center"><a href={contest.url} className="hover:text-black hover:dark:text-white "><SquareArrowOutUpRight size={18} className=" hover:w-[20px] h-[20px] transition-all duration-300 ease-in-out" /></a></div>
+                    <div className="w-[25px] h-[25px] flex justify-center items-center"><a href={contest.url} target="_blank" className="hover:text-black hover:dark:text-white "><SquareArrowOutUpRight size={18} className=" hover:w-[20px] h-[20px] transition-all duration-300 ease-in-out" /></a></div>
                 </div>
             </div>
             <h4 className="text-md md:text-lg lg:text-xl font-medium text-black dark:text-gray-300">{contest.title}</h4>
