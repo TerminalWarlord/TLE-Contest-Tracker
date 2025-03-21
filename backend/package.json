@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "npx tsc -b && node dist/index.js",
-    "start": "npx tsc -b && node dist/index.js",
-    "start:updateDb": "npx tsc -b  && node dist/worker/populateDb.js"
+    "build": "npx tsc -b",
+    "dev": "npm run build && node dist/index.js",
+    "start": "npm run build && node dist/index.js",
+    "start:updateDb": "npm run build && node dist/worker/populateDb.js"
   },
   "keywords": [],
   "author": "",

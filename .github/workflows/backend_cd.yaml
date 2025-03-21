@@ -1,0 +1,36 @@
+name: Deploy the backend on AWS EC2 Instance
+# Using PM2 for now, probably will shift to docker and ECS
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy the backend to EC2 instance
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v4
+
+      - name: Login to the EC2 instance
+        run: |
+          echo "${{ secrets.PRIVATE_KEY }}" > private_key.pem
+          chmod 400 private_key.pem
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.HOST_USER }}@${{ secrets.HOST_IP }} << 'EOF'
+            cd ~/contest-tracker 
+            if [ -d ".git" ]; then
+              git pull origin main
+            else
+              git init
+              git remote add origin https://github.com/${{ github.repository }}
+              git pull origin main
+            fi
+            npm install
+            npm run build
+            pm2 restart contest_tracker || pm2 start --name contest-tracker -- dist/index.js
+          EOF
