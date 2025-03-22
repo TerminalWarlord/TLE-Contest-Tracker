@@ -9,9 +9,9 @@ import { populateDbWithVideos } from "../utils/youtube";
     try {
         await connectDb();
 
-        // console.log("Starting video population...");
-        // await populateDbWithVideos();
-        // console.log("Videos have been updated!");
+        console.log("Starting video population...");
+        await populateDbWithVideos();
+        console.log("Videos have been updated!");
 
 
         // Makde updates on different platform independently since 
