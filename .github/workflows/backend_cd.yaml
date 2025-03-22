@@ -28,6 +28,14 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.HOST_USER }}@${{ secrets.HOST_IP }} << 'EOF'
             cd ~/contest-tracker 
+
+            # Trying to load NVM to get rid of pm2 command not found
+            # I am aware excecuting pm2 directly from the path (Using which pm2) would probably work
+            # This looks cleaner, trying it out. If doesnt workout with fallback to using pm2 path
+            export NVM_DIR="$HOME/.nvm"
+            source "$NVM_DIR/nvm.sh"
+
+
             if [ -d ".git" ]; then
               git pull origin main
             else
