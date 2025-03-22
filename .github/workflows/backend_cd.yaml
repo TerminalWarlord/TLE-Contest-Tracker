@@ -35,7 +35,9 @@ jobs:
               git remote add origin https://github.com/${{ github.repository }}
               git pull origin main
             fi
+            cd backend/
             npm install
             npm run build
-            pm2 restart contest_tracker || pm2 start --name contest-tracker -- dist/index.js
+            pm2 restart contest_tracker || pm2 start --name contest-tracker dist/index.js
+            pm2 save
           EOF
