@@ -18,6 +18,16 @@ const codechef = async (offset: number = 0) => {
         // get the result 
         const results = (await res.json()).contests;
 
+
+        // Get the upcoming contests
+        if(offset===0){
+            const upcomingContests = await getCodechefUpcomingContests();
+            results.push(...upcomingContests);
+        }
+
+
+
+
         if (!results.length) {
             return;
         }
@@ -34,52 +44,52 @@ const codechef = async (offset: number = 0) => {
 
 
         // Populate the DB
-        await Promise.all(results
+        const filteredResult = results
             .filter((res: any) => {
                 // filter out the exisiting contests
                 const url = "https://www.codechef.com/" + res.contest_code;
                 return !existingUrls.includes(url);
             })
-            .map(async (res: any) => {
+        for (const res of filteredResult) {
+            try {
+                const title = res.contest_name;
+                // Format the contest data
+                const url = "https://www.codechef.com/" + res.contest_code;
+
+                // Convert the date string to Unix
+                const startsAt = getUnixTime(res.contest_start_date);
+
+                // Convert the duration from minutes to seconds
+                const duration = parseInt(res.contest_duration) * 60;
+
+                // Check if the contest has ended
+                // const currentTimeInUnix = Math.floor((Date.now() / 1000))
+                // const hasEnded = startsAt < currentTimeInUnix;
+
+                // Get the appropiate yt url
+                // spliting the title at "(" because the pattern of CC is
+                // Starters 1xx (Rated till X stars)
+                const youtubeUrl = await mapWithYoutubePlaylist("CODECHEF", title.split('(')[0], url);
+
                 try {
-                    const title = res.contest_name;
-                    // Format the contest data
-                    const url = "https://www.codechef.com/" + res.contest_code;
-
-                    // Convert the date string to Unix
-                    const startsAt = getUnixTime(res.contest_start_date);
-
-                    // Convert the duration from minutes to seconds
-                    const duration = parseInt(res.contest_duration) * 60;
-
-                    // Check if the contest has ended
-                    // const currentTimeInUnix = Math.floor((Date.now() / 1000))
-                    // const hasEnded = startsAt < currentTimeInUnix;
-
-                    // Get the appropiate yt url
-                    // spliting the title at "(" because the pattern of CC is
-                    // Starters 1xx (Rated till X stars)
-                    const youtubeUrl = await mapWithYoutubePlaylist("CODECHEF", title.split('(')[0], url);
-
-                    try{
-                        // Store the new contests to the DB
-                        await Contest.create({
-                            title,
-                            url,
-                            duration: duration,
-                            startsAt: startsAt,
-                            platform: "CODECHEF",
-                            youtubeUrl: youtubeUrl?.fullUrl
-                        });
-                    }
-                    catch(err){
-                        console.log(url, "has already been added");
-                    }
+                    // Store the new contests to the DB
+                    await Contest.create({
+                        title,
+                        url,
+                        duration: duration,
+                        startsAt: startsAt,
+                        platform: "CODECHEF",
+                        youtubeUrl: youtubeUrl?.fullUrl
+                    });
                 }
                 catch (err) {
-                    console.log(err);
+                    console.log(url, "has already been added");
                 }
-            }));
+            }
+            catch (err) {
+                console.log(err);
+            }
+        };
         // NOT THE BEST IDEA BUT Recursively add 500 contests to the DB
         // if (offset <= 500) {
         await codechef(offset + 20);
@@ -89,6 +99,23 @@ const codechef = async (offset: number = 0) => {
         console.log(err);
     }
 }
+
+const getCodechefUpcomingContests = async () => {
+    try {
+        const res = await fetch('https://www.codechef.com/api/list/contests/all');
+        
+        // bad status code, raise error
+        if (!res.ok) {
+            throw Error("Failed to get Codechef contests");
+        }
+        const resData = await res.json();
+        return resData.future_contests;
+    }
+    catch (err) {
+        return [];
+    }
+}
+
 
 
 export default codechef;

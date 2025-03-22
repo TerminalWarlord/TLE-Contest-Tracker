@@ -98,12 +98,11 @@ const mapWithYoutubePlaylist = async (platform: PlatformType, contestTitle: stri
     // TLE Eliminator's playlists, but for the time being I will implement simple js methods
     // I will implement vector embedding semantic search later
 
-    // console.log("mapping")
+    // console.log("Finding videos for platform:", platform, contestTitle, contestUrl)
 
     // Fetch the videos for a specific platform and look for a match
     try {
-        const videos = await Video.find({ platform });
-
+        const videos = await Video.find({ platform }).exec();
         const video = videos.find(vid => {
             const videoTitle = vid.title.toLocaleLowerCase();
             const videoDesc = (vid.description || "").toLocaleLowerCase();

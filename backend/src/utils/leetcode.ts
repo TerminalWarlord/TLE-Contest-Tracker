@@ -84,13 +84,13 @@ const leetcode = async (page: number = 1) => {
 
 
         // Populate the DB
-        await Promise.all(results
+        const filteredResult = results
             .filter((res: any) => {
                 // filter out the exisiting contests
                 const url = "https://leetcode.com/contest/" + res.titleSlug;
                 return !existingUrls.includes(url);
-            })
-            .map(async (res: any) => {
+            });
+        for(const res of filteredResult){
                 try {
                     // Format the contest data
                     const url = "https://leetcode.com/contest/" + res.titleSlug;
@@ -126,7 +126,7 @@ const leetcode = async (page: number = 1) => {
                     console.log(res);
                     console.log(err);
                 }
-            }));
+            };
 
         // NOT THE BEST IDEA BUT Recursively add contests from 100 pages to the DB
         if (page <= totalPages) {

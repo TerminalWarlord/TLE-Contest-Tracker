@@ -27,54 +27,48 @@ const codeforces = async () => {
 
 
         // Populate the DB
-        await Promise.all(results
-            .filter((res: any) => {
-                // filter out the exisiting contests
+        const filteredResult = results.filter((res: any) => {
+            // filter out the exisiting contests
+            const url = "https://codeforces.com/contest/" + res.id;
+            return !existingUrls.includes(url);
+        });
+
+        for (const res of filteredResult) {
+            try {
+                // Basic contest data
+                const title = res.name;
+                const startsAt = res.startTimeSeconds;
+                const duration = res.durationSeconds;
                 const url = "https://codeforces.com/contest/" + res.id;
-                return !existingUrls.includes(url);
-            })
-            .map(async (res: any) => {
+                // console.log(title)
+
+                // Check if the contest has ended
+                // const currentTimeInUnix = Math.floor((Date.now() / 1000))
+                // const hasEnded = startsAt < currentTimeInUnix;
+
+                // Get the appropiate yt url
+                // console.log("Searching for match", title)
+                const youtubeUrl = await mapWithYoutubePlaylist("CODEFORCES", title, url);
+                // console.log("error", "done")
                 try {
-
-                    // Basic contest data
-                    const title = res.name;
-                    const startsAt = res.startTimeSeconds;
-                    const duration = res.durationSeconds;
-                    const url = "https://codeforces.com/contest/" + res.id;
-                    // console.log(title)
-
-                    // Check if the contest has ended
-                    // const currentTimeInUnix = Math.floor((Date.now() / 1000))
-                    // const hasEnded = startsAt < currentTimeInUnix;
-
-                    // Get the appropiate yt url
-                    // console.log("Searching for match")
-                    let youtubeUrl;
-                    try {
-                        youtubeUrl = await mapWithYoutubePlaylist("CODEFORCES", title, url);
-                    }
-                    catch (err) {
-                        console.log(err);
-                    }
-                    try {
-                        // Store the new contests to the DB
-                        await Contest.create({
-                            duration,
-                            startsAt,
-                            title,
-                            url,
-                            platform: "CODEFORCES",
-                            youtubeUrl: youtubeUrl?.fullUrl
-                        });
-                    }
-                    catch (err) {
-                        console.log(url, "has already been added");
-                    }
+                    // Store the new contests to the DB
+                    await Contest.create({
+                        duration,
+                        startsAt,
+                        title,
+                        url,
+                        platform: "CODEFORCES",
+                        youtubeUrl: youtubeUrl?.fullUrl
+                    });
                 }
                 catch (err) {
-                    console.log(err);
+                    console.log(url, "has already been added");
                 }
-            }));
+            }
+            catch (err) {
+                console.log(err);
+            }
+        }
         console.log("Total results fetched:", results.length);
         console.log("Filtered results:", results.filter((res: any) => !existingUrls.includes("https://codeforces.com/contest/" + res.id)).length);
     }
