@@ -20,7 +20,7 @@ const codechef = async (offset: number = 0) => {
 
 
         // Get the upcoming contests
-        if(offset===0){
+        if (offset === 0) {
             const upcomingContests = await getCodechefUpcomingContests();
             results.push(...upcomingContests);
         }
@@ -35,12 +35,18 @@ const codechef = async (offset: number = 0) => {
         // get the exisiting CC contests that are already in the DB
         const existingContests = await Contest.find({
             platform: "CODECHEF",
-            youtubeUrl: { $exists: true, $ne: "" }
-        }).select("url");
+        }).select("url youtubeUrl startsAt");
 
+        // current time in unix seconds
+        const curTime = Date.now() / 1000;
 
         // create a list of string from list of obj
-        const existingUrls = existingContests.map(contest => contest.url);
+        const existingUrls = existingContests
+            .filter(contest => {
+                return contest.youtubeUrl !== undefined && contest.youtubeUrl.length;
+            })
+            .filter(contest => contest.startsAt < curTime) //This is to handle in case the contest time chnages
+            .map(contest => contest.url);
 
 
         // Populate the DB
@@ -50,6 +56,13 @@ const codechef = async (offset: number = 0) => {
                 const url = "https://www.codechef.com/" + res.contest_code;
                 return !existingUrls.includes(url);
             })
+
+
+        if (!filteredResult.length) {
+            return;
+        }
+
+        
         for (const res of filteredResult) {
             try {
                 const title = res.contest_name;
@@ -73,14 +86,17 @@ const codechef = async (offset: number = 0) => {
 
                 try {
                     // Store the new contests to the DB
-                    await Contest.create({
-                        title,
+                    await Contest.updateOne({
                         url,
-                        duration: duration,
-                        startsAt: startsAt,
                         platform: "CODECHEF",
-                        youtubeUrl: youtubeUrl?.fullUrl
-                    });
+                    }, {
+                        $set: {
+                            title,
+                            duration: duration,
+                            startsAt: startsAt,
+                            youtubeUrl: youtubeUrl?.fullUrl
+                        }
+                    }, { upsert: true });
                 }
                 catch (err) {
                     console.log(url, "has already been added");
@@ -103,7 +119,7 @@ const codechef = async (offset: number = 0) => {
 const getCodechefUpcomingContests = async () => {
     try {
         const res = await fetch('https://www.codechef.com/api/list/contests/all');
-        
+
         // bad status code, raise error
         if (!res.ok) {
             throw Error("Failed to get Codechef contests");

@@ -19,11 +19,19 @@ const codeforces = async () => {
         // get the exisiting CF contests that are already in the DB
         const existingContests = await Contest.find({
             platform: "CODEFORCES",
-            youtubeUrl: { $exists: true, $ne: "" }
-        }).select("url");
+        }).select("url startsAt youtubeUrl");
+
+        // current time in unix seconds
+        const curTime = Date.now() / 1000;
 
         // create a list of string from list of obj
-        const existingUrls = existingContests.map(contest => contest.url);
+        const existingUrls = existingContests
+            .filter(contest => {
+                return contest.youtubeUrl !== undefined && contest.youtubeUrl.length;
+            }) //filter out contests which has no yt urls
+            .filter(contest => contest.startsAt < curTime) //This is to handle in case the contest time chnages
+            .map(contest => contest.url);
+
 
 
         // Populate the DB
@@ -52,14 +60,18 @@ const codeforces = async () => {
                 // console.log("error", "done")
                 try {
                     // Store the new contests to the DB
-                    await Contest.create({
-                        duration,
-                        startsAt,
-                        title,
+                    await Contest.updateOne({
                         url,
                         platform: "CODEFORCES",
-                        youtubeUrl: youtubeUrl?.fullUrl
-                    });
+
+                    }, {
+                        $set: {
+                            title,
+                            duration,
+                            startsAt,
+                            youtubeUrl: youtubeUrl?.fullUrl
+                        }
+                    }, { upsert: true });
                 }
                 catch (err) {
                     console.log(url, "has already been added");

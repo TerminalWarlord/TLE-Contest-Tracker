@@ -27,7 +27,7 @@ app.use(cors());
 
 
 // Use the rate limiter
-app.use(limiter);
+// app.use(limiter);
 
 
 

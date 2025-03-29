@@ -27,7 +27,7 @@ const ContestCard = ({ contest }: { contest: Contest }) => {
     const queryClient = useQueryClient();
     const [searchParams] = useSearchParams();
     const [isBookmarked, setIsBookmarked] = useState(contest.isBookmarked);
-    const [offset] = useState(parseInt(searchParams.get("offset") || "0"));
+    const offset = parseInt(searchParams.get("offset") || "0");
     const filterCtx = useContext(FilterContext);
     const userCtx = useContext(UserContext);
     const [youtubeUrl, setYoutubeUrl] = useState(contest.youtubeUrl || "");
@@ -39,7 +39,6 @@ const ContestCard = ({ contest }: { contest: Contest }) => {
 
     
 
-    console.log(userCtx.isAuthenticated, userCtx.user, contest.hasEnded)
 
     // Update bookmark and UI (handle success and fallback)
     const { mutate } = useMutation({
@@ -55,6 +54,7 @@ const ContestCard = ({ contest }: { contest: Contest }) => {
         }
     });
 
+    
 
     const { mutate: mutateOnContestEdit } = useMutation({
         mutationFn: async ({ contestId, youtubeUrl }: { contestId: string, youtubeUrl: string }) => await editContestYoutubeUrl(contestId, youtubeUrl),

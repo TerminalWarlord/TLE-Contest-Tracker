@@ -14,12 +14,12 @@ import { populateDbWithVideos } from "../utils/youtube";
         console.log("Videos have been updated!");
 
 
-        // Makde updates on different platform independently since 
+        // Makes updates on different platform independently since 
         // one doesnt rely on other
         await Promise.all([
-            await codeforces(),
-            await codechef(),
-            await leetcode(),
+            codeforces(),
+            codechef(),
+            leetcode(),
         ])
 
 

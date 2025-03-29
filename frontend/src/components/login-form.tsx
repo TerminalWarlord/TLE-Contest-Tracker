@@ -10,7 +10,9 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Link, useNavigate } from "react-router-dom"
-import { signIn, signUp } from "@/lib/http/auth"
+import { getUserDetails, signIn, signUp } from "@/lib/http/auth"
+import { useContext } from "react"
+import { UserContext } from "@/store/user-context"
 
 
 interface LoginFormProps extends React.ComponentProps<"div"> {
@@ -25,13 +27,19 @@ export function LoginForm({
   const navigate = useNavigate();
 
 
+  const userCtx = useContext(UserContext);
 
   const handleFormSubmit = async (ev: React.FormEvent<HTMLFormElement>) => {
     ev.preventDefault();
     try {
       if (mode === "login") {
         await signIn(new FormData(ev.target as HTMLFormElement));
+        const data = await getUserDetails();
+        if(data){
+          userCtx.logIn(data.role);
+        }
         navigate('/');
+
       }
       else {
         await signUp(new FormData(ev.target as HTMLFormElement));

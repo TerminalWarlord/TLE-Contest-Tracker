@@ -1,5 +1,4 @@
 import Filter from '../components/Filter'
-import NavBar from '../components/NavBar'
 import Footer from '../components/Footer';
 import { FilterType, PlatformType } from '@/types/contest';
 import { useState } from 'react';
@@ -21,8 +20,8 @@ const Home = () => {
   function resetPlatforms() {
     setSelectedPlatform(INITIAL_PLATFORMS);
   }
-  console.log(selectedPlatforms);
-  console.log(currentFilter);
+  // console.log(selectedPlatforms);
+  // console.log(currentFilter);
 
 
   function handlePlatformFilter(val: PlatformType) {
@@ -52,7 +51,6 @@ const Home = () => {
 
   return (
     <div className='w-full flex flex-col justify-center items-center'>
-      <NavBar />
       <div className='flex flex-col items-center pt-30 pb-10'>
         <h1 className='text-2xl md:text-3xl lg:text-4xl font-bold my-2 text-center'>Upcoming Contests</h1>
         <p className='w-4/5 text-center text-gray-500 text-sm md:text-md lg:text-base'>Upcoming Contests

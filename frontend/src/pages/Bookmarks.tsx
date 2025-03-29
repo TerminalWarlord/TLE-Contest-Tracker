@@ -1,5 +1,4 @@
 import Filter from '../components/Filter'
-import NavBar from '../components/NavBar'
 import Footer from '../components/Footer';
 import { FilterType, PlatformType } from '@/types/contest';
 import { useState } from 'react';
@@ -13,7 +12,6 @@ const INITIAL_PLATFORMS: PlatformType[] = ["CODEFORCES", "CODECHEF", "LEETCODE"]
 const Bookmark = () => {
   const [currentFilter, setCurrentFilter] = useState<FilterType>("all");
   const [selectedPlatforms, setSelectedPlatform] = useState<PlatformType[]>(INITIAL_PLATFORMS)
-
   function handleFilterChange(val: FilterType) {
     setCurrentFilter(val);
   }
@@ -52,7 +50,6 @@ const Bookmark = () => {
 
   return (
     <div className='w-full flex flex-col justify-between items-center  md:min-h-screen'>
-      <NavBar />
       <div className='flex flex-col items-center pt-30 pb-10'>
         <h1 className='text-2xl md:text-3xl lg:text-4xl font-bold my-2 text-center'>Upcoming Contests</h1>
         <p className='w-4/5 text-center text-gray-500 text-sm md:text-md lg:text-base'>Upcoming Contests

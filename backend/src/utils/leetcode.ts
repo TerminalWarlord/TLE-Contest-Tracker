@@ -68,7 +68,7 @@ const leetcode = async (page: number = 1) => {
 
         // results array dont contain upcoming contests, so we have fetch
         // them separately and merge them with results
-        if(page===1){
+        if (page === 1) {
             const upcomingContests = await twoTopContests();
             results.push(...upcomingContests);
         }
@@ -76,11 +76,18 @@ const leetcode = async (page: number = 1) => {
         // get the exisiting LC contests that are already in the DB
         const existingContests = await Contest.find({
             platform: "LEETCODE",
-            youtubeUrl: { $exists: true, $ne: "" }
-        }).select("url");
-        
+        }).select("url youtubeUrl");
+
+        // current time in unix seconds
+        const curTime = Date.now() / 1000;
+
         // create a list of string from list of obj
-        const existingUrls = existingContests.map(contest => contest.url);
+        const existingUrls = existingContests
+            .filter(contest => {
+                return contest.youtubeUrl !== undefined && contest.youtubeUrl.length;
+            })
+            .filter(contest => contest.startsAt < curTime)
+            .map(contest => contest.url);
 
 
         // Populate the DB
@@ -90,43 +97,51 @@ const leetcode = async (page: number = 1) => {
                 const url = "https://leetcode.com/contest/" + res.titleSlug;
                 return !existingUrls.includes(url);
             });
-        for(const res of filteredResult){
+
+        if (!filteredResult.length) {
+            return;
+        }
+        for (const res of filteredResult) {
+            try {
+                // Format the contest data
+                const url = "https://leetcode.com/contest/" + res.titleSlug;
+                const title = res.title;
+                const duration = res.duration;
+                const startsAt = res.startTime;
+
+                // Check if the contest has ended
+                // const currentTimeInUnix = Math.floor((Date.now() / 1000))
+                // const hasEnded = startsAt < currentTimeInUnix;
+
+                // Get the appropiate yt url
+                const youtubeUrl = await mapWithYoutubePlaylist("LEETCODE", title, url);
+
                 try {
-                    // Format the contest data
-                    const url = "https://leetcode.com/contest/" + res.titleSlug;
-                    const title = res.title;
-                    const duration = res.duration;
-                    const startsAt = res.startTime;
+                    // Store the new contests to the DB
+                    await Contest.updateOne({
+                        url,
+                        platform: "LEETCODE",
 
-                    // Check if the contest has ended
-                    // const currentTimeInUnix = Math.floor((Date.now() / 1000))
-                    // const hasEnded = startsAt < currentTimeInUnix;
-
-                    // Get the appropiate yt url
-                    const youtubeUrl = await mapWithYoutubePlaylist("LEETCODE", title, url);
-
-                    try{
-                        // Store the new contests to the DB
-                        await Contest.create({
-                            url,
+                    }, {
+                        $set: {
                             duration,
                             startsAt,
                             title,
-                            platform: "LEETCODE",
                             youtubeUrl: youtubeUrl?.fullUrl
-                        });
-                    }
-                    catch (err) {
-                        console.log(url, "has already been added");
-                    }
-                    
-                    
+                        }
+                    }, { upsert: true });
                 }
                 catch (err) {
-                    console.log(res);
-                    console.log(err);
+                    console.log(url, "has already been added");
                 }
-            };
+
+
+            }
+            catch (err) {
+                console.log(res);
+                console.log(err);
+            }
+        };
 
         // NOT THE BEST IDEA BUT Recursively add contests from 100 pages to the DB
         if (page <= totalPages) {

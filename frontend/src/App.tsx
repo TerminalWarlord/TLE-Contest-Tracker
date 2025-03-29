@@ -4,25 +4,25 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from './components/theme-provider';
 import Home from './pages/Home';
 import Authentication from './pages/Authentication';
-import Bookmark from './pages/Bookmarks';
 import { authLoader } from './lib/http/actions';
 import { UserContext } from './store/user-context';
 import { useState } from 'react';
+import NavBar from './components/NavBar';
 
 
 const queryClient = new QueryClient();
 
 const routes = createBrowserRouter([
   {
-    path: '/', children: [
+    path: '/', 
+    element: <NavBar/>,
+    children: [
       { index: true, element: <Home /> },
-      { path: "page/:page", element: <Home /> },
       {
         path: 'bookmarks',
         loader: authLoader,
         children: [
-          { index: true, element: <Bookmark /> },
-          { path: "page/:page", element: <Bookmark /> },
+          { index: true, element: <Home /> },
         ]
       },
       {
@@ -46,6 +46,7 @@ function App() {
     setUser(null);
   }
   const logIn = (role: string) => {
+    console.log("logged in")
     queryClient.removeQueries();
     setIsAuthenticated(true);
     setUser(role);

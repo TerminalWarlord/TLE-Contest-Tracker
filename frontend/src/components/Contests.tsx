@@ -5,42 +5,36 @@ import { CircleSlash2, Loader2 } from "lucide-react";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "./ui/pagination";
 import { Contest } from "@/types/contest";
-import { useContext, useState } from "react";
+import { useContext } from "react";
 import { FilterContext } from "@/store/filter-context";
 
 
 
 
 const Contests = () => {
-    const [searchParams] = useSearchParams();
+    // console.log("rendering contests")
+    const [searchParams, setSearchParams] = useSearchParams();
     const location = useLocation();
     const isBookmark = location.pathname.includes('bookmarks');
-    console.log(location.pathname, isBookmark);
+    // console.log(location.pathname, isBookmark);
 
-    const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get("page") || "0"))
-    const [offset, setOffset] = useState(parseInt(searchParams.get("offset") || "0"));
+    const offset = parseInt(searchParams.get("offset") || "0");
     const filterCtx = useContext(FilterContext);
-    const { data, error, isPending } = useQuery({
+    // console.log(filterCtx.platforms, filterCtx.type)
+
+    const { data, error, isFetching } = useQuery({
         queryKey: [isBookmark ? "bookmarked-contests" : "contests", offset, 20, filterCtx.platforms, filterCtx.type],
-        queryFn: () => getContests(offset, 20, filterCtx.platforms, filterCtx.type, isBookmark),
+        queryFn: async () => await getContests(offset, 20, filterCtx.platforms, filterCtx.type, isBookmark),
         staleTime: 5 * 60 * 1000
     });
 
 
+    // console.log(data, filterCtx.type)
+
     const handleNavigation = (identifier: "next" | "prev") => {
-        if (data && data.hasNextPage && identifier === "next") {
-            setCurrentPage(prevPage => prevPage + 1);
-            setOffset(prevOffset => prevOffset + 20);
-        }
-        if (identifier === "prev") {
-            setCurrentPage(prevPage => {
-                if (prevPage > 0) {
-                    setOffset(prevOffset => prevOffset - 20);
-                }
-                return prevPage > 0 ? prevPage - 1 : 0;
-            });
-        }
-    }
+        const newOffset = identifier === "next" ? offset + 20 : Math.max(0, offset - 20);
+        setSearchParams({ offset: newOffset.toString() });
+    };
 
 
 
@@ -53,7 +47,7 @@ const Contests = () => {
                 </svg>
             </div>
             <h2 className="text-xl font-semibold mb-2">Failed to load contests</h2>
-            <p className="text-gray-600 mb-4">There was an error loading the contest data.</p>
+            <p className="text-gray-6   00 mb-4">There was an error loading the contest data.</p>
             <button
                 className="px-4 py-2 bg-primary text-white dark:text-gray-600 rounded-md hover:bg-primary/90"
                 onClick={() => window.location.reload()}
@@ -62,13 +56,13 @@ const Contests = () => {
             </button>
         </div>
     }
-    if (isPending) {
+
+    if (isFetching) {
         content = <div className="flex flex-col items-center justify-center min-h-[30vh]">
             <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" />
             <p className="text-lg text-gray-600">Loading contests...</p>
         </div>
     }
-    console.log(data && data.contests && data.contests?.length > 0)
     if (data && data.contests && !data.contests?.length) {
         content = <div className="flex flex-col items-center justify-center min-h-[30vh]">
             <CircleSlash2 className="w-12 h-12 text-primary mb-4" />
@@ -89,7 +83,7 @@ const Contests = () => {
                 <PaginationContent>
                     <PaginationItem>
                         <PaginationPrevious
-                            className={`${currentPage > 0 ? 'cursor-pointer' : 'cursor-not-allowed'}`}
+                            className={`${offset > 0 ? 'cursor-pointer' : 'cursor-not-allowed'}`}
                             onClick={() => handleNavigation("prev")}
                         />
                     </PaginationItem>

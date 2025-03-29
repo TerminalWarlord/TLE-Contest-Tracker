@@ -1,5 +1,5 @@
-import { Bookmark, Calendar } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Bookmark, Calendar, Loader } from "lucide-react";
+import { Link, Outlet, useNavigate } from "react-router-dom";
 import { ModeToggle } from "./mode-toggle";
 import { useQuery } from "@tanstack/react-query";
 import { getUserDetails } from "@/lib/http/auth";
@@ -10,35 +10,33 @@ import { UserContext } from "@/store/user-context";
 const NavBar = () => {
     const navigate = useNavigate()
 
-    const [isLoggedIn, setIsLoggedIn] = useState<boolean>(!!localStorage.getItem('token'));
     const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
     const userCtx = useContext(UserContext);
+    console.log("Navbar rendered", userCtx.isAuthenticated)
 
-    const { data, refetch } = useQuery({
+    const { data, isFetching } = useQuery({
         queryKey: ["user"],
         queryFn: getUserDetails,
-        staleTime: 5 * 60 * 1000,
-        enabled: isLoggedIn
+        staleTime: 5 * 60 * 100,
     })
 
 
     const handleLogout = () => {
         localStorage.removeItem("token");
-        setIsLoggedIn(false);
         userCtx.logOut();
         navigate('/auth/login');
 
     }
 
     useEffect(() => {
-        if (isLoggedIn) {
-            if (data) {
-                console.log(data)
-                userCtx.logIn((data as { role: string }).role)
-            }
-            refetch();
+        if (data) {
+            userCtx.logIn((data as { role: string }).role);
         }
-    }, [isLoggedIn, refetch]);
+    }, [data, userCtx]);
+
+    if (isFetching) {
+        return <Loader className="animate-spin" />
+    }
 
 
     return (
@@ -51,7 +49,7 @@ const NavBar = () => {
                     </Link>
                     <div className="flex space-x-2 ">
                         <ModeToggle></ModeToggle>
-                        {isLoggedIn && data ? <>
+                        {userCtx.isAuthenticated && data ? <>
                             <Link to="/bookmarks" className="py-2 px-3 outline-1 hover:bg-blue-400/10 rounded-lg flex space-x-1 items-center">
                                 <Bookmark size={15} className="text-blue-400" />
                                 <p className="text-blue-400 text-sm">Bookmarks</p>
@@ -69,7 +67,7 @@ const NavBar = () => {
             <div className="block w-screen md:hidden ">
                 <div className={`w-screen h-screen bg-slate-300/70 fixed top-0 left-0 backdrop-blur-xs z-10 transition-all duration-800 ease-in-out  animate-in slide-in-from-left ${isMobileNavOpen ? 'block' : 'hidden'}`}>
                     <div className="flex flex-col items-center justify-center pt-15 space-y-1 w-screen h-screen transition-all duration-800 ease-in-out">
-                        {isLoggedIn && data ? <>
+                        {userCtx.isAuthenticated && data ? <>
                             <Link to="/bookmarks" className="py-2 px-3 outline-1 hover:bg-blue-400/10 rounded-lg flex space-x-1 items-center">
                                 <Bookmark size={15} />
                                 <p className=" text-sm">Bookmarks</p>
@@ -107,6 +105,7 @@ const NavBar = () => {
                     </div>
                 </nav>
             </div>
+            <Outlet />
         </>
     )
 }

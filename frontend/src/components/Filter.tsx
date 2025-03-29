@@ -10,13 +10,14 @@ const Filter = () => {
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const filterCtx = useContext(FilterContext);
 
-    // TODO: Fix platform buttons
     const [platforms, setPlatforms] = useState<PlatformType[]>(filterCtx.platforms);
 
     useEffect(() => {
         setPlatforms(filterCtx.platforms);
     }, [filterCtx]);
-    console.log(filterCtx.type)
+    
+    // console.log(filterCtx.type)
+
     function toggleFilter() {
         setIsFilterOpen(prevState => !prevState)
     }
