@@ -22,12 +22,25 @@ connectDb();
 const app = express();
 app.use(express.json());
 
-// TODO: Update cors whitelist
-app.use(cors());
+// app.use(cors());
 
+const allowedOrigins = [
+    "http://localhost:5173", 
+    "https://contest-tracker.joybiswas.com" // Production
+];
 
+app.use(cors({
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
+    credentials: true // Allows cookies and authorization headers
+}));
 // Use the rate limiter
-// app.use(limiter);
+app.use(limiter);
 
 
 
